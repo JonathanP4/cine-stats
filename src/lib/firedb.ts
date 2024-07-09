@@ -7,7 +7,7 @@ export async function writeUserData(
     uid: string,
     name: string,
     email: string,
-    photoURL: string | null,
+    photoURL: string | null
 ) {
     await set(ref(db, `users/${uid}`), {
         name,
@@ -35,7 +35,7 @@ export async function updateUserData(
     uid: string,
     photoURL: string,
     name: string,
-    email: string,
+    email: string
 ) {
     try {
         const updates: any = {};
@@ -49,7 +49,7 @@ export async function updateUserData(
 export async function updateUserBookmarks(
     uid: string,
     movieId: string,
-    data: MovieInfo | null,
+    data: any
 ) {
     try {
         const updates: any = {};
@@ -79,7 +79,7 @@ export async function getBookmark(uid: string, movieId: string) {
     try {
         const dbRef = ref(db);
         const snapshot = await get(
-            child(dbRef, `users/${uid}/bookmarks/${movieId}`),
+            child(dbRef, `users/${uid}/bookmarks/${movieId}`)
         );
 
         if (snapshot.exists()) {

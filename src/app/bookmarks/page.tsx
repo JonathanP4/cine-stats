@@ -36,8 +36,8 @@ export default function BookmarksPage() {
                 }
             >
                 {!!bookmarks.length &&
-                    bookmarks.map((b: MovieInfo) => (
-                        <Link href={`/movie/${b.id}?type=${b.type}`}>
+                    bookmarks.map((b: MovieData) => (
+                        <Link href={`/movie/${b.id}?type=${b.title}`}>
                             <div
                                 className={
                                     "grid max-w-[200px] min-h-[322px] w-full bg-secondary rounded-md p-2 transition-all hover:shadow-[-10px_10px_15px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:-translate-y-1"
@@ -48,7 +48,7 @@ export default function BookmarksPage() {
                                         className={
                                             "rounded-t-md h-[250px] object-cover"
                                         }
-                                        src={b.coverURL}
+                                        src={b.backdrop_path}
                                         alt={`${b.title} cover image`}
                                     />
                                 </figure>
