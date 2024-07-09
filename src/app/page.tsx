@@ -75,7 +75,6 @@ export default function Home() {
                     >
                         {data.movies.results.map((m: MovieData) => (
                             <Card
-                                type="movie"
                                 key={m.id}
                                 id={m.id}
                                 posterPath={m.poster_path}
@@ -101,7 +100,6 @@ export default function Home() {
                     >
                         {data.tv.results.map((t: TvData) => (
                             <Card
-                                type={"tv"}
                                 key={t.id}
                                 id={t.id}
                                 posterPath={t.poster_path}

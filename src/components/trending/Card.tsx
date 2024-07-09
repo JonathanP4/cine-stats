@@ -9,7 +9,6 @@ type Props = {
     releaseDate: string;
     backdropPath: string;
     posterPath: string;
-    type: MediaTypes;
     id: number;
 };
 
@@ -18,7 +17,6 @@ export function Card({
     releaseDate,
     backdropPath,
     posterPath,
-    type,
     id,
 }: Props) {
     const localeDate = new Date(releaseDate).toLocaleString(
@@ -63,7 +61,7 @@ export function Card({
                         />
                     </figure>
                     <div>
-                        <h2 className="font-semibold">{title}</h2>
+                        <h2 className="font-semibold line-clamp-2">{title}</h2>
                         <p className="text-sm text-slate-400">{localeDate}</p>
                     </div>
                 </div>

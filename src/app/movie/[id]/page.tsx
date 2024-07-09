@@ -12,6 +12,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { HeartIcon, HeartFilledIcon } from "@radix-ui/react-icons";
 import { getBookmark, updateUserBookmarks } from "@/lib/firedb";
 import { Auth } from "@/store/Auth";
+import Link from "next/link";
 
 type Params = {
     params: { id: string };
@@ -19,7 +20,7 @@ type Params = {
 
 export default function MovieInfo({ params }: Params) {
     const { user } = Auth();
-    const [info, setInfo] = useState<SearchMovieData | null>();
+    const [info, setInfo] = useState<SearchMovieData | null | any>();
     const [bookmark, setBookmark] = useState(false);
 
     useEffect(() => {
@@ -28,6 +29,7 @@ export default function MovieInfo({ params }: Params) {
                 type: "movie",
                 id: params.id,
                 lang: navigator.language,
+                append_data: ["releases", "credits"],
             });
 
             console.log(data);
@@ -45,7 +47,7 @@ export default function MovieInfo({ params }: Params) {
         })();
     }, [user]);
 
-    if (!info) return;
+    if (!info) return <LoadingSpinner />;
 
     const postBookmark = async () => {
         if (user) {
@@ -66,6 +68,18 @@ export default function MovieInfo({ params }: Params) {
 
     const releaseDate = new Date(info.release_date);
     const rating = +Math.round(info.vote_average * 10);
+    const countryReleases = info.releases.countries.filter(
+        (c: any) => c.iso_3166_1 === navigator.language.split("-")[1]
+    );
+    const crew = {
+        director: info.credits.crew.filter((c: any) => c.job === "Director")[0],
+        producer: info.credits.crew.filter((c: any) => c.job === "Producer")[0],
+        writer: info.credits.crew.filter((c: any) => c.job === "Writer")[0],
+        characters:
+            info.credits.crew.filter((c: any) => c.job === "Characters")[0] ||
+            "",
+    };
+
     let pathColor;
 
     if (rating >= 60) {
@@ -75,8 +89,6 @@ export default function MovieInfo({ params }: Params) {
     } else {
         pathColor = "#facc15";
     }
-
-    if (!info) return <LoadingSpinner />;
 
     return (
         <main className={"overflow-x-hidden"}>
@@ -126,30 +138,55 @@ export default function MovieInfo({ params }: Params) {
                             }
                         >
                             <div>
-                                <h1 className={"text-3xl font-bold"}>
-                                    {info.title}
-                                </h1>
-
-                                <span className={"text-slate-500"}>
-                                    ({releaseDate.getFullYear()})
-                                </span>
-                                <div className={"mt-1 text-sm text-left"}>
-                                    {info.genres.map((g) => g.name).join(", ")}
+                                <div className="flex items-center gap-2">
+                                    <h1 className={"text-3xl font-bold"}>
+                                        {info.title}
+                                    </h1>
+                                    <span
+                                        className={
+                                            "text-3xl font-semibold text-slate-500"
+                                        }
+                                    >
+                                        ({releaseDate.getFullYear()})
+                                    </span>
                                 </div>
-                                <div className={"mt-1 text-sm text-left"}>
-                                    {`${(info.runtime / 60).toFixed(0)}h ${
-                                        info.runtime % 60
-                                    }m`}
+
+                                <div className="flex items-center gap-2 text-sm mt-1">
+                                    <span className="border border-primary/50 p-1">
+                                        {countryReleases[0].certification}
+                                    </span>
+                                    <p>
+                                        {releaseDate.toLocaleDateString(
+                                            navigator.language,
+                                            {
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                year: "numeric",
+                                            }
+                                        )}
+                                    </p>
+                                    |
+                                    <span>
+                                        {info.genres
+                                            .map((g: any) => g.name)
+                                            .join(", ")}
+                                    </span>
+                                    |
+                                    <span>
+                                        {`${(info.runtime / 60).toFixed(0)}h ${
+                                            info.runtime % 60
+                                        }m`}
+                                    </span>
                                 </div>
                                 <div className={"mt-1 text-sm text-left"}></div>
                             </div>
                         </div>
                         <div
                             className={
-                                "-mr-[50px] flex items-center justify-center md:justify-start gap-4"
+                                "-mr-[50px] flex items-center justify-center md:justify-start gap-2 mt-5"
                             }
                         >
-                            <div className={"w-20 mt-6"}>
+                            <div className={"w-20"}>
                                 <CircularProgressbar
                                     styles={{
                                         path: {
@@ -174,36 +211,61 @@ export default function MovieInfo({ params }: Params) {
 
                         <div className={"mt-6 max-w-4xl"}>
                             <h2 className={"text-xl font-semibold mb-2"}>
-                                Description
+                                Overview
                             </h2>
                             <p className={"text-slate-300 text-justify"}>
                                 {info.overview}
                             </p>
                         </div>
 
-                        {/* <div className={"mt-6 grid grid-cols-2 text-left"}>
-                           
-                                <div>
-                                    <h2 className={"font-semibold"}>
-                                        Director(s)
-                                    </h2>
-                                   
-                                        <p>{info.p.join(", ")}</p>
-                                    
-                                </div>
-                            
-                            {!!info?.writers.length && (
-                                <div>
-                                    <h2 className={"font-semibold"}>
-                                        Writer(s)
-                                    </h2>
+                        <div
+                            className={
+                                "mt-6 grid grid-cols-3 gap-y-4 text-left transition-all"
+                            }
+                        >
+                            <div>
+                                <h2 className={"font-semibold"}>Writer</h2>
 
-                                    <p>
-                                        {info.writers.join(", ") || "Unknown"}
-                                    </p>
-                                </div>
-                            )}
-                        </div> */}
+                                <Link
+                                    href={"/"}
+                                    className="transition-all hover:tracking-wide hover:opacity-60"
+                                >
+                                    {crew.writer.original_name}
+                                </Link>
+                            </div>
+
+                            <div>
+                                <h2 className={"font-semibold"}>Director</h2>
+
+                                <Link
+                                    href={"/"}
+                                    className="transition-all hover:tracking-wide hover:opacity-60"
+                                >
+                                    {crew.director.original_name}
+                                </Link>
+                            </div>
+
+                            <div>
+                                <h2 className={"font-semibold"}>Producer</h2>
+
+                                <Link
+                                    href={"/"}
+                                    className="transition-all hover:tracking-wide hover:opacity-60"
+                                >
+                                    {crew.producer.original_name}
+                                </Link>
+                            </div>
+                            <div>
+                                <h2 className={"font-semibold"}>Characters</h2>
+
+                                <Link
+                                    href={"/"}
+                                    className="transition-all hover:tracking-wide hover:opacity-60"
+                                >
+                                    {crew.characters.original_name}
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
