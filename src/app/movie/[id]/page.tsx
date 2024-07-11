@@ -5,14 +5,14 @@ import "react-circular-progressbar/dist/styles.css";
 
 import { api } from "@/lib/axios";
 import Image from "next/image";
-import { IAnimeResult, IMovieResult } from "@consumet/extensions";
-import ResultItem, { BASE_IMG_URL } from "@/components/ResultItem";
+import { BASE_IMG_URL } from "@/components/ResultItem";
 import { useState, useEffect } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { HeartIcon, HeartFilledIcon } from "@radix-ui/react-icons";
 import { getBookmark, updateUserBookmarks } from "@/lib/firedb";
 import { Auth } from "@/store/Auth";
 import Link from "next/link";
+import { CastCard } from "@/components/CastCard";
 
 type Params = {
     params: { id: string };
@@ -29,7 +29,7 @@ export default function MovieInfo({ params }: Params) {
                 type: "movie",
                 id: params.id,
                 lang: navigator.language,
-                append_data: ["releases", "credits"],
+                append_data: ["releases", "credits", "videos"],
             });
 
             console.log(data);
@@ -66,7 +66,21 @@ export default function MovieInfo({ params }: Params) {
         }
     };
 
-    const releaseDate = new Date(info.release_date);
+    const intlDate = new Intl.DateTimeFormat(navigator.language, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+
+    const intlNumber = new Intl.NumberFormat(navigator.language, {
+        style: "currency",
+        currency: "USD",
+    });
+
+    const intlNames = new Intl.DisplayNames([navigator.language], {
+        type: "language",
+    });
+
     const rating = +Math.round(info.vote_average * 10);
     const countryReleases = info.releases.countries.filter(
         (c: any) => c.iso_3166_1 === navigator.language.split("-")[1]
@@ -79,23 +93,26 @@ export default function MovieInfo({ params }: Params) {
             info.credits.crew.filter((c: any) => c.job === "Characters")[0] ||
             "",
     };
+    const trailers = info.videos.results.filter(
+        (t: any) => t.type === "Trailer"
+    );
 
     let pathColor;
 
-    if (rating >= 60) {
+    if (rating >= 70) {
         pathColor = "#4ade80";
-    } else if (rating < 50) {
+    } else if (rating < 60) {
         pathColor = "#f87171";
     } else {
         pathColor = "#facc15";
     }
 
     return (
-        <main className={"overflow-x-hidden"}>
+        <main>
             <section className={"relative text-center md:text-left "}>
                 <div className={"w-full h-full fixed top-0 -z-10"}>
                     <Image
-                        className="rounded-lg object-cover w-full h-full opacity-15"
+                        className="rounded-lg object-fill w-full h-full opacity-15"
                         src={BASE_IMG_URL + info.backdrop_path}
                         width={486}
                         height={729}
@@ -147,7 +164,7 @@ export default function MovieInfo({ params }: Params) {
                                             "text-3xl font-semibold text-slate-500"
                                         }
                                     >
-                                        ({releaseDate.getFullYear()})
+                                        ({info.release_date.split("-")[0]})
                                     </span>
                                 </div>
 
@@ -156,13 +173,8 @@ export default function MovieInfo({ params }: Params) {
                                         {countryReleases[0].certification}
                                     </span>
                                     <p>
-                                        {releaseDate.toLocaleDateString(
-                                            navigator.language,
-                                            {
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                year: "numeric",
-                                            }
+                                        {intlDate.format(
+                                            new Date(info.release_date)
                                         )}
                                     </p>
                                     |
@@ -210,6 +222,9 @@ export default function MovieInfo({ params }: Params) {
                         </div>
 
                         <div className={"mt-6 max-w-4xl"}>
+                            <p className="text-primary/50 italic">
+                                {info.tagline}
+                            </p>
                             <h2 className={"text-xl font-semibold mb-2"}>
                                 Overview
                             </h2>
@@ -269,97 +284,44 @@ export default function MovieInfo({ params }: Params) {
                     </div>
                 </div>
             </section>
-            {/* <section className={"p-6 bg-background/60"}>
-                <div className={"justify-evenly gap-6 mb-6 md:flex lg:gap-0"}>
+            <section className={"p-6 bg-background/60"}>
+                <div className="flex gap-4 justify-evenly">
                     <iframe
-                        className={"max-w-[560px] w-full"}
+                        className="rounded-md"
+                        src={`http://www.youtube.com/embed/${trailers[0].key}`}
                         width="560"
                         height="315"
-                        src={`${info?.trailer?.url?.slice(0, 23)}/embed/${
-                            info?.trailer?.id
-                        }`}
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
-                    <div
-                        className={
-                            "flex justify-between items-baseline md:block md:space-y-6"
-                        }
-                    >
-                        {info?.releaseDate && (
-                            <div>
-                                <h2 className={"text-lg font-semibold"}>
-                                    Release Date
-                                </h2>
-                                <span>
-                                    {releaseDate.toLocaleDateString(
-                                        navigator.language
-                                    )}
-                                </span>
-                            </div>
-                        )}
-                        {info?.duration && (
-                            <div>
-                                <h2 className={"text-lg font-semibold"}>
-                                    Duration
-                                </h2>
-                                <span className={"text-slate-300"}>
-                                    {Math.floor(info.duration / 60)}h{" "}
-                                    {info.duration % 60}m
-                                </span>
-                            </div>
-                        )}
-                        {info?.logo && (
-                            <div>
-                                <h2 className={"text-lg font-semibold"}>
-                                    Logo
-                                </h2>
-                                <Image
-                                    className={"max-w-[200px] h-auto"}
-                                    src={info.logos[0].url}
-                                    alt={info.title + " logo"}
-                                    width={info.logos[0].width}
-                                    height={Math.round(
-                                        info.logos[0].width /
-                                            info.logos[0].aspectRatio
-                                    )}
-                                />
-                                )
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <h2 className={"text-xl font-semibold mb-2"}>Cast</h2>
-                {info?.actors && (
-                    <dl
-                        className={
-                            "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 text-sm"
-                        }
-                    >
-                        {info.actors.map((a: string) => (
-                            <dd key={a}>{a}</dd>
-                        ))}
+                    />
+                    <dl className="grid grid-cols-2 content-start gap-y-4">
+                        <dd>
+                            <h3 className="font-bold">Status</h3>
+                            <p>{info.status}</p>
+                        </dd>
+                        <dd>
+                            <h3 className="font-bold">Original Language</h3>
+                            <p>{intlNames.of(info.original_language)}</p>
+                        </dd>
+                        <dd>
+                            <h3 className="font-bold">Budget</h3>
+                            <p>{intlNumber.format(info.budget)}</p>
+                        </dd>
+                        <dd>
+                            <h3 className="font-bold">Revenue</h3>
+                            <p>{intlNumber.format(info.revenue)}</p>
+                        </dd>
                     </dl>
-                )}
+                </div>
             </section>
-            {info?.similar && (
-                <section className={"bg-slate-900/80 p-6"}>
-                    <h2 className={"text-2xl font-semibold mb-6"}>
-                        You might also like
-                    </h2>
-                    <div
-                        className={
-                            "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
-                        }
-                    >
-                        {info.similar.map((r: IMovieResult | IAnimeResult) => (
-                            <ResultItem key={r.id} info={r} />
+            <section className="p-6">
+                <h2 className="font-bold text-3xl">Cast</h2>
+                <ul className="overflow-x-scroll">
+                    <li className="flex items-stretch gap-4 py-4">
+                        {info.credits.cast.map((c: any) => (
+                            <CastCard cast={c} />
                         ))}
-                    </div>
-                </section>
-            )} */}
+                    </li>
+                </ul>
+            </section>
         </main>
     );
 }
