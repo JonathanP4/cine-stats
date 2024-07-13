@@ -2,10 +2,10 @@ import { BASE_IMG_URL } from "./ResultItem";
 
 export function CastCard({ cast }: { cast: any }) {
     return (
-        <div className="rounded-md min-w-[150px]">
+        <div className="rounded-md w-[150px]">
             <figure className="overflow-hidden rounded-md">
                 <img
-                    className="rounded-t-md transition-all duration-300 min-h-[225px] object-cover hover:scale-105"
+                    className="rounded-t-md transition-all duration-300 h-[225px] object-cover hover:scale-105"
                     src={
                         cast.profile_path
                             ? BASE_IMG_URL + cast.profile_path

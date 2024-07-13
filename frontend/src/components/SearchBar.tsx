@@ -8,7 +8,7 @@ type Props = { movieTitle?: string };
 
 export function SearchBar({ movieTitle }: Props) {
     const [searchInput, setSearchInput] = useState(
-        movieTitle?.replaceAll("%20", " ") || "",
+        movieTitle?.replaceAll("%20", " ")
     );
     const router = useRouter();
 

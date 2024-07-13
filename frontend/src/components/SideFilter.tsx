@@ -1,15 +1,19 @@
 import { MixerHorizontalIcon } from "@radix-ui/react-icons";
-import { TvType } from "@consumet/extensions";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import React from "react";
 import Link from "next/link";
 
 type Props = {
+    totalResults: {
+        movie: number;
+        tv: number;
+        people: number;
+    };
     onFilter: (type: MediaTypes) => void;
 };
 
-export function SidebarOptions({ onFilter }: Props) {
+export function SideFilter({ onFilter, totalResults }: Props) {
     const filterHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
         const value = e.currentTarget.value as MediaTypes;
         onFilter(value);
@@ -18,7 +22,7 @@ export function SidebarOptions({ onFilter }: Props) {
     return (
         <aside
             className={
-                "min-w-[150px] w-full max-h-[210px] mb-6 md:max-w-[200px] md:mb-0"
+                "min-w-[200px] w-full max-h-[210px] mb-6 md:max-w-[200px] md:mb-0"
             }
         >
             <div
@@ -43,6 +47,9 @@ export function SidebarOptions({ onFilter }: Props) {
                         <Label htmlFor={"movie"} className={"ml-2 text-md"}>
                             Movie
                         </Label>
+                        <span className="text-primary/50 ml-1">
+                            ({totalResults.movie})
+                        </span>
                     </div>
                     <div className={"flex items-center"}>
                         <RadioGroupItem
@@ -53,6 +60,9 @@ export function SidebarOptions({ onFilter }: Props) {
                         <Label htmlFor={"tv"} className={"ml-2 text-md"}>
                             TV Series
                         </Label>
+                        <span className="text-primary/50 ml-1">
+                            ({totalResults.tv})
+                        </span>
                     </div>
                     <div className={"flex items-center"}>
                         <RadioGroupItem
@@ -63,6 +73,9 @@ export function SidebarOptions({ onFilter }: Props) {
                         <Label htmlFor={"people"} className={"ml-2 text-md"}>
                             People
                         </Label>
+                        <span className="text-primary/50 ml-1">
+                            ({totalResults.people})
+                        </span>
                     </div>
                 </RadioGroup>
             </div>

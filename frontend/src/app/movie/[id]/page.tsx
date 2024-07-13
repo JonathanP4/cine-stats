@@ -121,12 +121,14 @@ export default function MovieInfo({ params }: Params) {
                 </div>
                 <div
                     className={
-                        "p-6 flex flex-col justify-center items-center gap-6 md:gap-10 md:flex-row"
+                        "p-6 flex flex-col justify-center items-center gap-6 md:gap-10 md:flex-row md:justify-normal"
                     }
                 >
                     <figure className={"md:max-w-[300px] relative"}>
                         <div
-                            className={"absolute m-2 cursor-pointer"}
+                            className={
+                                "absolute m-1 cursor-pointer bg-secondary/40 rounded-full p-1"
+                            }
                             onClick={postBookmark}
                         >
                             {bookmark ? (
@@ -164,14 +166,19 @@ export default function MovieInfo({ params }: Params) {
                                             "text-3xl font-semibold text-slate-500"
                                         }
                                     >
-                                        ({info.release_date.split("-")[0]})
+                                        (
+                                        {info?.release_date?.split("-")[0] ||
+                                            "-"}
+                                        )
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-sm mt-1">
-                                    <span className="border border-primary/50 p-1">
-                                        {countryReleases[0].certification}
-                                    </span>
+                                    {countryReleases[0]?.certification && (
+                                        <span className="border border-primary/50 p-1">
+                                            {countryReleases[0].certification}
+                                        </span>
+                                    )}
                                     <p>
                                         {intlDate.format(
                                             new Date(info.release_date)
@@ -238,80 +245,97 @@ export default function MovieInfo({ params }: Params) {
                                 "mt-6 grid grid-cols-3 gap-y-4 text-left transition-all"
                             }
                         >
-                            <div>
-                                <h2 className={"font-semibold"}>Writer</h2>
+                            {crew?.writer && (
+                                <div>
+                                    <h2 className={"font-semibold"}>Writer</h2>
 
-                                <Link
-                                    href={"/"}
-                                    className="transition-all hover:tracking-wide hover:opacity-60"
-                                >
-                                    {crew.writer.original_name}
-                                </Link>
-                            </div>
+                                    <Link
+                                        href={"/"}
+                                        className="transition-all hover:tracking-wide hover:opacity-60"
+                                    >
+                                        {crew.writer.original_name}
+                                    </Link>
+                                </div>
+                            )}
 
-                            <div>
-                                <h2 className={"font-semibold"}>Director</h2>
+                            {crew?.director && (
+                                <div>
+                                    <h2 className={"font-semibold"}>
+                                        Director
+                                    </h2>
 
-                                <Link
-                                    href={"/"}
-                                    className="transition-all hover:tracking-wide hover:opacity-60"
-                                >
-                                    {crew.director.original_name}
-                                </Link>
-                            </div>
+                                    <Link
+                                        href={"/"}
+                                        className="transition-all hover:tracking-wide hover:opacity-60"
+                                    >
+                                        {crew.director.original_name}
+                                    </Link>
+                                </div>
+                            )}
 
-                            <div>
-                                <h2 className={"font-semibold"}>Producer</h2>
+                            {crew?.producer && (
+                                <div>
+                                    <h2 className={"font-semibold"}>
+                                        Producer
+                                    </h2>
 
-                                <Link
-                                    href={"/"}
-                                    className="transition-all hover:tracking-wide hover:opacity-60"
-                                >
-                                    {crew.producer.original_name}
-                                </Link>
-                            </div>
-                            <div>
-                                <h2 className={"font-semibold"}>Characters</h2>
+                                    <Link
+                                        href={"/"}
+                                        className="transition-all hover:tracking-wide hover:opacity-60"
+                                    >
+                                        {crew.producer.original_name}
+                                    </Link>
+                                </div>
+                            )}
+                            {crew?.characters && (
+                                <div>
+                                    <h2 className={"font-semibold"}>
+                                        Characters
+                                    </h2>
 
-                                <Link
-                                    href={"/"}
-                                    className="transition-all hover:tracking-wide hover:opacity-60"
-                                >
-                                    {crew.characters.original_name}
-                                </Link>
-                            </div>
+                                    <Link
+                                        href={"/"}
+                                        className="transition-all hover:tracking-wide hover:opacity-60"
+                                    >
+                                        {crew.characters.original_name}
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
-            <section className={"p-6 bg-background/60"}>
-                <div className="flex gap-4 justify-evenly">
-                    <iframe
-                        className="rounded-md"
-                        src={`http://www.youtube.com/embed/${trailers[0].key}`}
-                        width="560"
-                        height="315"
-                    />
-                    <dl className="grid grid-cols-2 content-start gap-y-4">
-                        <dd>
-                            <h3 className="font-bold">Status</h3>
-                            <p>{info.status}</p>
-                        </dd>
-                        <dd>
-                            <h3 className="font-bold">Original Language</h3>
-                            <p>{intlNames.of(info.original_language)}</p>
-                        </dd>
-                        <dd>
-                            <h3 className="font-bold">Budget</h3>
-                            <p>{intlNumber.format(info.budget)}</p>
-                        </dd>
-                        <dd>
-                            <h3 className="font-bold">Revenue</h3>
-                            <p>{intlNumber.format(info.revenue)}</p>
-                        </dd>
-                    </dl>
-                </div>
-            </section>
+            {!!trailers.length && (
+                <section className={"p-6 bg-background/60"}>
+                    <div className="flex gap-4 justify-evenly">
+                        <iframe
+                            className="rounded-md"
+                            src={`http://www.youtube.com/embed/${trailers[0]?.key}`}
+                            width="560"
+                            height="315"
+                        />
+
+                        <dl className="grid grid-cols-2 content-start gap-y-4">
+                            <dd>
+                                <h3 className="font-bold">Status</h3>
+                                <p>{info.status}</p>
+                            </dd>
+                            <dd>
+                                <h3 className="font-bold">Original Language</h3>
+                                <p>{intlNames.of(info.original_language)}</p>
+                            </dd>
+                            <dd>
+                                <h3 className="font-bold">Budget</h3>
+                                <p>{intlNumber.format(info.budget)}</p>
+                            </dd>
+                            <dd>
+                                <h3 className="font-bold">Revenue</h3>
+                                <p>{intlNumber.format(info.revenue)}</p>
+                            </dd>
+                        </dl>
+                    </div>
+                </section>
+            )}
             <section className="p-6">
                 <h2 className="font-bold text-3xl">Cast</h2>
                 <ul className="overflow-x-scroll">

@@ -13,9 +13,15 @@ type Props = {
     lastPage: number;
     currentPage: number;
     setPage: (p: number) => void;
+    className?: string;
 };
 
-export function ResultsPagination({ lastPage, setPage, currentPage }: Props) {
+export function ResultsPagination({
+    lastPage,
+    setPage,
+    currentPage,
+    className,
+}: Props) {
     const [pages, setPages] = useState([1, 2, 3]);
     const [showInput, setShowInput] = useState(false);
     const [count, setCount] = useState(1);
@@ -64,7 +70,7 @@ export function ResultsPagination({ lastPage, setPage, currentPage }: Props) {
     };
 
     return (
-        <Pagination className={"mt-6"}>
+        <Pagination className={`mt-6 ${className || ""}`}>
             <PaginationContent className={"cursor-pointer"}>
                 <PaginationItem>
                     <PaginationPrevious onClick={() => clickHandler("PREV")} />
