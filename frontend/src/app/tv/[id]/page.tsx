@@ -306,7 +306,7 @@ export default function TvInfo({ params }: Params) {
                     <div className="flex gap-4 justify-evenly">
                         <iframe
                             className="rounded-md"
-                            src={`http://www.youtube.com/embed/${trailers[0]?.key}`}
+                            src={`https://www.youtube.com/embed/${trailers[0]?.key}`}
                             width="560"
                             height="315"
                         />

@@ -38,7 +38,7 @@ export function Header() {
                         className="max-w-[180px] h-auto select-none"
                     />
                 </Link>
-                <NavMenu />
+                {/* <NavMenu /> */}
                 <div className={"block md:hidden"}>
                     <MobileNav />
                 </div>
