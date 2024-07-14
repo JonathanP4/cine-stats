@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import searchRoutes from "./routes/search.js";
-import trendingRoutes from "./routes/trending.js";
-import detailsRoutes from "./routes/details.js";
+import searchRoutes from "./routes/search";
+import trendingRoutes from "./routes/trending";
+import detailsRoutes from "./routes/details";
 
 dotenv.config();
 

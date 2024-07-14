@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { tmdb } from "../lib/axios.js";
+import { tmdb } from "../lib/axios";
 const router = Router();
 
 router.post("/movie/:id(\\d+)", async (req, res, next) => {
