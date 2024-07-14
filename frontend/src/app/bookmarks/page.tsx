@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getUserBookmarks } from "@/lib/firedb";
 import { Auth } from "@/store/Auth";
 import Link from "next/link";
+import { Card } from "@/components/trending/Card";
 
 export default function BookmarksPage() {
     const [bookmarks, setBookmarks] = useState<any>([]);
@@ -36,33 +37,7 @@ export default function BookmarksPage() {
                 }
             >
                 {!!bookmarks.length &&
-                    bookmarks.map((b: MovieData) => (
-                        <Link href={`/movie/${b.id}?type=${b.title}`}>
-                            <div
-                                className={
-                                    "grid max-w-[200px] min-h-[322px] w-full bg-secondary rounded-md p-2 transition-all hover:shadow-[-10px_10px_15px_rgba(255,255,255,0.2)] hover:translate-x-1 hover:-translate-y-1"
-                                }
-                            >
-                                <figure>
-                                    <img
-                                        className={
-                                            "rounded-t-md h-[250px] object-cover"
-                                        }
-                                        src={b.backdrop_path}
-                                        alt={`${b.title} cover image`}
-                                    />
-                                </figure>
-
-                                <p
-                                    className={
-                                        "line-clamp-2 font-semibold self-center text-center"
-                                    }
-                                >
-                                    {b.title}
-                                </p>
-                            </div>
-                        </Link>
-                    ))}
+                    bookmarks.map((b: MovieData) => <Card data={b} />)}
             </div>
         </main>
     );

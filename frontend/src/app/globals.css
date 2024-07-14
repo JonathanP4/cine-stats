@@ -61,7 +61,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: hsla(var(--secondary) / 0.7);
+    background-color: hsla(var(--secondary));
 }
 
 ::-webkit-scrollbar-thumb:horizontal {

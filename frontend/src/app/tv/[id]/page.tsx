@@ -4,31 +4,33 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
 import { api } from "@/lib/axios";
-import Image from "next/image";
 import ResultItem, { BASE_IMG_URL } from "@/components/ResultItem";
 import { useState, useEffect } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { HeartIcon, HeartFilledIcon } from "@radix-ui/react-icons";
 import { getBookmark, updateUserBookmarks } from "@/lib/firedb";
 import { Auth } from "@/store/Auth";
-import Link from "next/link";
 import { CastCard } from "@/components/CastCard";
+import Link from "next/link";
+import Image from "next/image";
 
 type Params = {
     params: { id: string };
 };
 
-export default function MovieInfo({ params }: Params) {
+export default function TvInfo({ params }: Params) {
     const { user } = Auth();
     const [info, setInfo] = useState<SearchMovieData | null | any>();
     const [bookmark, setBookmark] = useState(false);
 
     useEffect(() => {
         (async function fetchInfo() {
-            const { data } = await api.post(`/details/movie/${params.id}`, {
+            const { data } = await api.post(`/details/tv/${params.id}`, {
                 language: navigator.language,
                 append_to_response: "releases,credits,videos,recommendations",
             });
+            console.log(data);
+
             setInfo(data);
         })();
     }, []);
@@ -78,9 +80,9 @@ export default function MovieInfo({ params }: Params) {
     });
 
     const rating = +Math.round(info.vote_average * 10);
-    const countryReleases = info.releases.countries.filter(
-        (c: any) => c.iso_3166_1 === navigator.language.split("-")[1]
-    );
+    // const countryReleases = info.releases.countries.filter(
+    //     (c: any) => c.iso_3166_1 === navigator.language.split("-")[1]
+    // );
     const crew = {
         director: info.credits.crew.filter((c: any) => c.job === "Director")[0],
         producer: info.credits.crew.filter((c: any) => c.job === "Producer")[0],
@@ -155,7 +157,7 @@ export default function MovieInfo({ params }: Params) {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <h1 className={"text-3xl font-bold"}>
-                                        {info.title}
+                                        {info.name}
                                     </h1>
                                     <span
                                         className={
@@ -163,21 +165,21 @@ export default function MovieInfo({ params }: Params) {
                                         }
                                     >
                                         (
-                                        {info?.release_date?.split("-")[0] ||
+                                        {info?.first_air_date?.split("-")[0] ||
                                             "-"}
                                         )
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-sm mt-1">
-                                    {countryReleases[0]?.certification && (
+                                    {/* {countryReleases[0]?.certification && (
                                         <span className="border border-primary/50 p-1">
                                             {countryReleases[0].certification}
                                         </span>
-                                    )}
+                                    )} */}
                                     <p>
                                         {intlDate.format(
-                                            new Date(info.release_date)
+                                            new Date(info.first_air_date)
                                         )}
                                     </p>
                                     |
@@ -188,9 +190,7 @@ export default function MovieInfo({ params }: Params) {
                                     </span>
                                     |
                                     <span>
-                                        {`${(info.runtime / 60).toFixed(0)}h ${
-                                            info.runtime % 60
-                                        }m`}
+                                        {`${info.number_of_seasons} seasons (${info.number_of_episodes} episodes)`}
                                     </span>
                                 </div>
                                 <div className={"mt-1 text-sm text-left"}></div>
@@ -312,25 +312,39 @@ export default function MovieInfo({ params }: Params) {
                         />
 
                         <dl className="space-y-4">
-                            <dd>
-                                <h3 className="font-bold">Status</h3>
-                                <p>{info.status || "-"}</p>
-                            </dd>
-                            <dd>
-                                <h3 className="font-bold">Original Language</h3>
-                                <p>
-                                    {intlNames.of(info.original_language) ||
-                                        "-"}
-                                </p>
-                            </dd>
-                            <dd>
-                                <h3 className="font-bold">Budget</h3>
-                                <p>{intlNumber.format(info.budget) || "-"}</p>
-                            </dd>
-                            <dd>
-                                <h3 className="font-bold">Revenue</h3>
-                                <p>{intlNumber.format(info.revenue) || "-"}</p>
-                            </dd>
+                            {info?.status && (
+                                <dd>
+                                    <h3 className="font-bold">Status</h3>
+                                    <p>{info.status || "-"}</p>
+                                </dd>
+                            )}
+                            {info.original_language && (
+                                <dd>
+                                    <h3 className="font-bold">
+                                        Original Language
+                                    </h3>
+                                    <p>
+                                        {intlNames.of(info.original_language) ||
+                                            "-"}
+                                    </p>
+                                </dd>
+                            )}
+                            {!!info.budget && (
+                                <dd>
+                                    <h3 className="font-bold">Budget</h3>
+                                    <p>
+                                        {intlNumber.format(info.budget) || "-"}
+                                    </p>
+                                </dd>
+                            )}
+                            {!!info.revenue && (
+                                <dd>
+                                    <h3 className="font-bold">Revenue</h3>
+                                    <p>
+                                        {intlNumber.format(info.revenue) || "-"}
+                                    </p>
+                                </dd>
+                            )}
                         </dl>
                     </div>
                 </section>

@@ -26,6 +26,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "firebase": "^10.12.2",
+    "luxon": "^3.4.4",
     "next": "14.2.4",
     "react": "^18",
     "react-circular-progressbar": "^2.1.0",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.6.0",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

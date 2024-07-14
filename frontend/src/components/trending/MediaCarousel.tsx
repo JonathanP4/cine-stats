@@ -3,9 +3,10 @@ import { MouseEvent, ReactNode, useRef } from "react";
 
 type Props = {
     children: ReactNode;
-    changeTimeFrame: (timeFrame: TimeFrames, type: MediaTypes) => void;
-    type: MediaTypes;
-    timeFrame: TimeFrames;
+    type?: MediaTypes;
+    containerWidth?: number;
+    timeFrame?: TimeFrames;
+    changeTimeFrame?: (timeFrame: TimeFrames, type: MediaTypes) => void;
     className?: string;
 };
 
@@ -13,6 +14,7 @@ export function MediaCarousel({
     children,
     className,
     timeFrame,
+    containerWidth,
     type,
     changeTimeFrame,
 }: Props) {
@@ -20,7 +22,7 @@ export function MediaCarousel({
 
     const slideHandler = (e: MouseEvent) => {
         if (!carouselRef.current) return;
-        const innerWidth = window.innerWidth;
+        const innerWidth = containerWidth || window.innerWidth;
         const name = (e.target as HTMLButtonElement).name as "left" | "right";
 
         carouselRef.current.scrollBy({
@@ -31,33 +33,35 @@ export function MediaCarousel({
 
     const clickHandler = (e: MouseEvent) => {
         const name = (e.target as HTMLButtonElement).name as TimeFrames;
-        changeTimeFrame(name, type);
+        if (changeTimeFrame && type) changeTimeFrame(name, type);
     };
 
     return (
         <>
-            <div className="flex items-center p-1 w-fit rounded-lg bg-secondary">
-                <button
-                    name="day"
-                    onClick={clickHandler}
-                    className={`${
-                        timeFrame === "day" &&
-                        "bg-gradient-to-br from-sky-400 to-secondary/40"
-                    } px-2 rounded-l-md`}
-                >
-                    Today
-                </button>
-                <button
-                    name="week"
-                    onClick={clickHandler}
-                    className={`${
-                        timeFrame === "week" &&
-                        "bg-gradient-to-br from-sky-400 to-secondary/40"
-                    } px-2 rounded-r-md`}
-                >
-                    Week
-                </button>
-            </div>
+            {timeFrame && (
+                <div className="flex items-center p-1 w-fit rounded-lg bg-secondary">
+                    <button
+                        name="day"
+                        onClick={clickHandler}
+                        className={`${
+                            timeFrame === "day" &&
+                            "bg-gradient-to-br from-sky-400 to-secondary/40"
+                        } px-2 rounded-l-md`}
+                    >
+                        Today
+                    </button>
+                    <button
+                        name="week"
+                        onClick={clickHandler}
+                        className={`${
+                            timeFrame === "week" &&
+                            "bg-gradient-to-br from-sky-400 to-secondary/40"
+                        } px-2 rounded-r-md`}
+                    >
+                        Week
+                    </button>
+                </div>
+            )}
 
             <div className={`relative ${className || ""}`}>
                 <div

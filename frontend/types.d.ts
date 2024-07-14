@@ -5,7 +5,7 @@ type UserData = {
     photoURL: string | null;
 };
 
-type MediaTypes = "movie" | "tv" | "people";
+type MediaTypes = "movie" | "tv" | "person";
 
 type ResultsData = {
     page: number;

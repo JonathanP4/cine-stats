@@ -8,7 +8,7 @@ type Props = {
     totalResults: {
         movie: number;
         tv: number;
-        people: number;
+        person: number;
     };
     onFilter: (type: MediaTypes) => void;
 };
@@ -67,14 +67,14 @@ export function SideFilter({ onFilter, totalResults }: Props) {
                     <div className={"flex items-center"}>
                         <RadioGroupItem
                             onClick={filterHandler}
-                            value={"people"}
-                            id={"people"}
+                            value={"person"}
+                            id={"person"}
                         />
-                        <Label htmlFor={"people"} className={"ml-2 text-md"}>
+                        <Label htmlFor={"person"} className={"ml-2 text-md"}>
                             People
                         </Label>
                         <span className="text-primary/50 ml-1">
-                            ({totalResults.people})
+                            ({totalResults.person})
                         </span>
                     </div>
                 </RadioGroup>

@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import "./SearchBar.css";
 
 type Props = { movieTitle?: string };
 
@@ -18,10 +19,10 @@ export function SearchBar({ movieTitle }: Props) {
     };
 
     return (
-        <div className="flex justify-center">
+        <div className={`flex justify-center items-center`}>
             <form
                 onSubmit={submitHandler}
-                className="bg-secondary rounded-md p-1 flex items-center w-full max-w-[500px]"
+                className="animate-in bg-secondary rounded-md p-1 flex items-center w-full max-w-[500px]"
             >
                 <Input
                     value={searchInput}
@@ -30,10 +31,14 @@ export function SearchBar({ movieTitle }: Props) {
                 />
                 <Button
                     type="submit"
-                    className="rounded-l-none bg-transparent hover:bg-transparent"
-                >
-                    <MagnifyingGlassIcon width={30} height={30} color="white" />
-                </Button>
+                    className="rounded-l-none hidden bg-transparent hover:bg-transparent"
+                ></Button>
+                <MagnifyingGlassIcon
+                    className="cursor-pointer mx-2"
+                    width={30}
+                    height={30}
+                    color="white"
+                />
             </form>
         </div>
     );

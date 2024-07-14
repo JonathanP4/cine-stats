@@ -4,10 +4,17 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { Skeleton } from "./ui/skeleton";
+import { twMerge } from "tailwind-merge";
 
 export const BASE_IMG_URL = process.env.NEXT_PUBLIC_BASE_IMG_URL;
 
-export default function ResultItem({ info }: { info: any }) {
+export default function ResultItem({
+    info,
+    className,
+}: {
+    info: any;
+    className?: string;
+}) {
     const [imgLoading, setImgLoading] = useState(true);
 
     const releaseDate = new Intl.DateTimeFormat(navigator.language, {
@@ -17,8 +24,11 @@ export default function ResultItem({ info }: { info: any }) {
     return (
         <Link href={`/movie/${info.id}`}>
             <div
-                style={{ boxShadow: "0 0 10px 0 hsla(100 100% 100% / 0.2)" }}
-                className="flex bg-secondary rounded-r-lg shadow-lg relative"
+                style={{ boxShadow: "0 0 10px 0 hsla(100 100% 100%/0.15)" }}
+                className={twMerge(
+                    "flex bg-secondary rounded-r-lg shadow-lg relative",
+                    className
+                )}
             >
                 {imgLoading && (
                     <Skeleton className="absolute w-[100px] h-[150px] rounded-l-lg" />
@@ -40,7 +50,7 @@ export default function ResultItem({ info }: { info: any }) {
 
                 <div className="grid content-evenly px-4">
                     <div>
-                        <h1 className="font-bold">
+                        <h1 className="font-bold line-clamp-3">
                             {info.title || info.original_name}
                         </h1>
 

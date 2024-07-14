@@ -1,11 +1,15 @@
+import Link from "next/link";
 import { BASE_IMG_URL } from "./ResultItem";
 
 export function CastCard({ cast }: { cast: any }) {
     return (
-        <div className="rounded-md w-[150px]">
-            <figure className="overflow-hidden rounded-md">
+        <Link
+            href={`/person/${cast.id}`}
+            className="cursor-pointer rounded-md min-w-[150px]"
+        >
+            <figure className="overflow-hidden rounded-t-md">
                 <img
-                    className="rounded-t-md transition-all duration-300 h-[225px] object-cover hover:scale-105"
+                    className="h-[225px] w-full rounded-t-md transition-all duration-300 object-cover hover:scale-105"
                     src={
                         cast.profile_path
                             ? BASE_IMG_URL + cast.profile_path
@@ -16,9 +20,9 @@ export function CastCard({ cast }: { cast: any }) {
             </figure>
             <div className="p-2 bg-secondary rounded-b-md">
                 <h3
-                    className="text font-semibold line-clamp-1"
+                    className="whitespace-nowrap overflow-hidden text-ellipsis w-[134px]"
                     title={
-                        cast.original_name.length > 16 ? cast.original_name : ""
+                        cast.original_name.length > 15 ? cast.original_name : ""
                     }
                 >
                     {cast.original_name}
@@ -30,6 +34,6 @@ export function CastCard({ cast }: { cast: any }) {
                     {cast.character}
                 </p>
             </div>
-        </div>
+        </Link>
     );
 }
