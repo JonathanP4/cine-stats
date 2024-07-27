@@ -2,10 +2,9 @@
 
 import { MediaCard } from "@/components/MediaCard";
 import { MediaCarousel } from "@/components/MediaCarousel";
-import { Searchbar } from "@/components/Searchbar";
+import { SearchBar } from "@/components/SearchBar";
 import { TimeFrameSelector } from "@/components/TimeFrameSelector";
 import { api } from "@/lib/axios";
-import { Auth } from "@/store/Auth";
 import { useEffect, useState } from "react";
 
 type TimeFrameState = {
@@ -34,7 +33,6 @@ export default function Home() {
 				time_frame: timeFrame[type],
 				language: navigator.language,
 			});
-			console.log(data);
 
 			switch (type) {
 				case "movie":
@@ -67,7 +65,7 @@ export default function Home() {
 
 	return (
 		<main className="p-6 space-y-10">
-			<Searchbar className="m-auto" />
+			<SearchBar className="m-auto" />
 			{movieData?.results && (
 				<section>
 					<h1 className="text-3xl font-semibold mb-4">

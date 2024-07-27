@@ -2,7 +2,8 @@ import { Input } from "./ui/input";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-export function Searchbar({ className }: { className?: string }) {
+
+export function SearchBar({ className }: { className?: string }) {
 	return (
 		<form className={cn("max-w-lg w-full", className)}>
 			<div className="flex items-center">
