@@ -1,381 +1,318 @@
 "use client";
 
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { MediaCard } from "@/components/MediaCard";
+import { MediaCarousel } from "@/components/MediaCarousel";
+import { ResultCard } from "@/components/ResultCard";
+import { api } from "@/lib/axios";
+import { DateTime } from "luxon";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-import { api } from "@/lib/axios";
-import ResultItem, { BASE_IMG_URL } from "@/components/ResultItem";
-import { useState, useEffect } from "react";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { HeartIcon, HeartFilledIcon } from "@radix-ui/react-icons";
-import { getBookmark, updateUserBookmarks } from "@/lib/firedb";
-import { Auth } from "@/store/Auth";
-import { CastCard } from "@/components/CastCard";
-import Link from "next/link";
-import Image from "next/image";
-
-type Params = {
-    params: { id: string };
+type Props = {
+	params: { id: string };
 };
 
-export default function TvInfo({ params }: Params) {
-    const { user } = Auth();
-    const [info, setInfo] = useState<SearchMovieData | null | any>();
-    const [bookmark, setBookmark] = useState(false);
+export default function DetailsPage({ params }: Props) {
+	const [data, setData] = useState<any>();
 
-    useEffect(() => {
-        (async function fetchInfo() {
-            const { data } = await api.post(`/details/tv/${params.id}`, {
-                language: navigator.language,
-                append_to_response: "releases,credits,videos,recommendations",
-            });
-            console.log(data);
+	const fetchMediaInfo = async () => {
+		const { data } = await api.post("/details", {
+			media_type: "tv",
+			id: params.id,
+			language: navigator.language,
+			append_to_response:
+				"credits,recommendations,images,keywords,videos,release_dates",
+		});
+		setData(data);
+	};
 
-            setInfo(data);
-        })();
-    }, []);
+	useEffect(() => {
+		fetchMediaInfo();
+	}, []);
 
-    useEffect(() => {
-        (async function fetchBookmark() {
-            if (user) {
-                const bookmarkExists = await getBookmark(user.uid, params.id);
-                setBookmark(!!bookmarkExists);
-            }
-        })();
-    }, [user]);
+	if (!data) return <LoadingSpinner />;
 
-    if (!info) return <LoadingSpinner />;
+	const voteAvg = Math.round((data?.vote_average || 0) * 10);
+	const ageRating = data?.release_dates?.results
+		?.filter(
+			(r: any) =>
+				r.iso_3166_1 ===
+				(navigator.language.split("-")[1] ||
+					navigator.language.toUpperCase())
+		)[0]
+		.release_dates.filter((rd: any) => rd.certification !== "")[0];
 
-    const postBookmark = async () => {
-        if (user) {
-            if (!bookmark) {
-                await updateUserBookmarks(user.uid, params.id, {
-                    id: params.id,
-                    title: info.title,
-                    poster_path: info.poster_path,
-                    backdrop_path: info.backdrop_path,
-                    type: "movie",
-                });
-                setBookmark(true);
-            } else {
-                await updateUserBookmarks(user.uid, params.id, null);
-                setBookmark(false);
-            }
-        }
-    };
+	const intlCurrency = new Intl.NumberFormat(navigator.language, {
+		currency: "usd",
+		style: "currency",
+	});
+	const getDisplayName = new Intl.DisplayNames(navigator.language, {
+		style: "long",
+		type: "language",
+	});
 
-    const intlDate = new Intl.DateTimeFormat(navigator.language, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+	let strokeColor = "";
 
-    const intlNumber = new Intl.NumberFormat(navigator.language, {
-        style: "currency",
-        currency: "USD",
-    });
+	if (voteAvg >= 60) {
+		strokeColor = "rgba(0,255,0,0.8)";
+	} else if (voteAvg < 60 && voteAvg >= 50) {
+		strokeColor = "rgba(255,255,0,0.8)";
+	} else {
+		strokeColor = "rgba(255,0,0,0.8)";
+	}
 
-    const intlNames = new Intl.DisplayNames([navigator.language], {
-        type: "language",
-    });
+	const crew = {
+		director: data.credits.crew.filter((c: any) => c.job === "Director")[0]
+			?.name,
+		producer: data.credits.crew.filter((c: any) => c.job === "Producer")[0]
+			?.name,
+		characters: data.credits.crew.filter(
+			(c: any) => c.job === "Characters"
+		)[0]?.name,
+		writer: data.credits.crew.filter((c: any) => c.job === "Writer")[0]
+			?.name,
+	};
 
-    const rating = +Math.round(info.vote_average * 10);
-    // const countryReleases = info.releases.countries.filter(
-    //     (c: any) => c.iso_3166_1 === navigator.language.split("-")[1]
-    // );
-    const crew = {
-        director: info.credits.crew.filter((c: any) => c.job === "Director")[0],
-        producer: info.credits.crew.filter((c: any) => c.job === "Producer")[0],
-        writer: info.credits.crew.filter((c: any) => c.job === "Writer")[0],
-        characters:
-            info.credits.crew.filter((c: any) => c.job === "Characters")[0] ||
-            "",
-    };
-    const trailers = info.videos.results.filter(
-        (t: any) => t.type === "Trailer"
-    );
+	return (
+		<main className="relative">
+			<Image
+				className="fixed -z-10 opacity-20 top-0 left-0"
+				src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
+				alt="a"
+				width={1376}
+				height={500}
+			/>
+			<section className="flex gap-x-8 p-6">
+				<figure className="rounded-md">
+					<Image
+						className="rounded-md"
+						src={
+							data?.poster_path
+								? "https://image.tmdb.org/t/p/w342" +
+								  data.poster_path
+								: "/images/placeholder.png"
+						}
+						width={300}
+						height={450}
+						alt={data.title + " poster"}
+					></Image>
+				</figure>
+				<div className="basis-[70%]">
+					<div>
+						<h1 className="text-3xl font-bold mb-1">
+							{data?.name || "--"}
+							<span className="text-primary/40 font-normal ml-2">
+								(
+								{DateTime.fromISO(data.first_air_date).get(
+									"year"
+								)}
+								)
+							</span>
+						</h1>
+						<dl className="flex items-center text-sm">
+							{ageRating?.certification && (
+								<dd className="border border-primary/30 px-2 rounded-sm">
+									{ageRating.certification}
+								</dd>
+							)}
+							{data?.first_air_date && (
+								<dd className="ml-2">
+									{DateTime.fromISO(
+										data.first_air_date
+									).toLocaleString({
+										day: "2-digit",
+										month: "2-digit",
+										year: "numeric",
+									})}
+								</dd>
+							)}
+							{!!data?.genres?.length && (
+								<>
+									<span className="mx-2">|</span>
+									<dd>
+										{data.genres
+											.map((g: any) => g.name)
+											.join(",")}
+									</dd>
+									<span className="mx-2">|</span>
+								</>
+							)}
+							{data?.runtime && (
+								<dd>
+									{Math.round(data.runtime / 60)}h{" "}
+									{data.runtime % 60}m
+								</dd>
+							)}
+						</dl>
+					</div>
+					<div className="w-[140px] flex items-center gap-2 my-6">
+						<CircularProgressbar
+							background
+							value={voteAvg}
+							text={`${voteAvg}%`}
+							styles={{
+								path: {
+									stroke: strokeColor,
+									strokeLinecap: "round",
+								},
+								trail: {
+									stroke: "rgba(0,0,0,0)",
+								},
+								text: {
+									fill: strokeColor,
+								},
 
-    let pathColor;
-
-    if (rating >= 70) {
-        pathColor = "#4ade80";
-    } else if (rating < 60) {
-        pathColor = "#f87171";
-    } else {
-        pathColor = "#facc15";
-    }
-
-    return (
-        <main>
-            <section className={"relative text-center md:text-left "}>
-                <div className={"w-full h-full fixed top-0 -z-10"}>
-                    <Image
-                        className="rounded-lg object-fill w-full h-full opacity-15"
-                        src={BASE_IMG_URL + info.backdrop_path}
-                        width={486}
-                        height={729}
-                        alt={info.title}
-                    />
-                </div>
-                <div
-                    className={
-                        "p-6 flex flex-col justify-center items-center gap-6 md:gap-10 md:flex-row md:justify-normal"
-                    }
-                >
-                    <figure className={"md:max-w-[300px] relative"}>
-                        <div
-                            className={
-                                "absolute m-1 cursor-pointer bg-secondary/40 rounded-full p-1"
-                            }
-                            onClick={postBookmark}
-                        >
-                            {bookmark ? (
-                                <HeartFilledIcon
-                                    color={"red"}
-                                    width={25}
-                                    height={25}
-                                />
-                            ) : (
-                                <HeartIcon width={25} height={25} />
-                            )}
-                        </div>
-
-                        <Image
-                            className="rounded-lg"
-                            src={BASE_IMG_URL + info.poster_path}
-                            width={486}
-                            height={729}
-                            alt={info.title}
-                        />
-                    </figure>
-                    <div>
-                        <div
-                            className={
-                                "flex justify-center items-center gap-12 md:justify-start"
-                            }
-                        >
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h1 className={"text-3xl font-bold"}>
-                                        {info.name}
-                                    </h1>
-                                    <span
-                                        className={
-                                            "text-3xl font-semibold text-slate-500"
-                                        }
-                                    >
-                                        (
-                                        {info?.first_air_date?.split("-")[0] ||
-                                            "-"}
-                                        )
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center gap-2 text-sm mt-1">
-                                    {/* {countryReleases[0]?.certification && (
-                                        <span className="border border-primary/50 p-1">
-                                            {countryReleases[0].certification}
-                                        </span>
-                                    )} */}
-                                    <p>
-                                        {intlDate.format(
-                                            new Date(info.first_air_date)
-                                        )}
-                                    </p>
-                                    |
-                                    <span>
-                                        {info.genres
-                                            .map((g: any) => g.name)
-                                            .join(", ")}
-                                    </span>
-                                    |
-                                    <span>
-                                        {`${info.number_of_seasons} seasons (${info.number_of_episodes} episodes)`}
-                                    </span>
-                                </div>
-                                <div className={"mt-1 text-sm text-left"}></div>
-                            </div>
-                        </div>
-                        <div
-                            className={
-                                "-mr-[50px] flex items-center justify-center md:justify-start gap-2 mt-5"
-                            }
-                        >
-                            <div className={"w-20"}>
-                                <CircularProgressbar
-                                    styles={{
-                                        path: {
-                                            stroke: pathColor,
-                                        },
-                                        text: {
-                                            fill: "white",
-
-                                            fontWeight: "bold",
-                                        },
-                                        trail: {
-                                            stroke: "#1e293b",
-                                        },
-                                    }}
-                                    value={rating}
-                                    text={`${rating}%`}
-                                />
-                            </div>
-
-                            <span className={"font-bold"}>Score</span>
-                        </div>
-
-                        <div className={"mt-6 max-w-4xl"}>
-                            <p className="text-primary/50 italic">
-                                {info.tagline}
-                            </p>
-                            <h2 className={"text-xl font-semibold mb-2"}>
-                                Overview
-                            </h2>
-                            <p className={"text-slate-300 text-justify"}>
-                                {info.overview}
-                            </p>
-                        </div>
-
-                        <div
-                            className={
-                                "mt-6 grid grid-cols-3 gap-y-4 text-left transition-all"
-                            }
-                        >
-                            {crew?.writer && (
-                                <div>
-                                    <h2 className={"font-semibold"}>Writer</h2>
-
-                                    <Link
-                                        href={"/"}
-                                        className="transition-all hover:tracking-wide hover:opacity-60"
-                                    >
-                                        {crew.writer.original_name}
-                                    </Link>
-                                </div>
-                            )}
-
-                            {crew?.director && (
-                                <div>
-                                    <h2 className={"font-semibold"}>
-                                        Director
-                                    </h2>
-
-                                    <Link
-                                        href={"/"}
-                                        className="transition-all hover:tracking-wide hover:opacity-60"
-                                    >
-                                        {crew.director.original_name}
-                                    </Link>
-                                </div>
-                            )}
-
-                            {crew?.producer && (
-                                <div>
-                                    <h2 className={"font-semibold"}>
-                                        Producer
-                                    </h2>
-
-                                    <Link
-                                        href={"/"}
-                                        className="transition-all hover:tracking-wide hover:opacity-60"
-                                    >
-                                        {crew.producer.original_name}
-                                    </Link>
-                                </div>
-                            )}
-                            {crew?.characters && (
-                                <div>
-                                    <h2 className={"font-semibold"}>
-                                        Characters
-                                    </h2>
-
-                                    <Link
-                                        href={"/"}
-                                        className="transition-all hover:tracking-wide hover:opacity-60"
-                                    >
-                                        {crew.characters.original_name}
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </section>
-            {!!trailers.length && (
-                <section className={"p-6 py-20 bg-background/60"}>
-                    <div className="flex gap-4 justify-evenly">
-                        <iframe
-                            className="rounded-md"
-                            src={`https://www.youtube.com/embed/${trailers[0]?.key}`}
-                            width="560"
-                            height="315"
-                        />
-
-                        <dl className="space-y-4">
-                            {info?.status && (
-                                <dd>
-                                    <h3 className="font-bold">Status</h3>
-                                    <p>{info.status || "-"}</p>
-                                </dd>
-                            )}
-                            {info.original_language && (
-                                <dd>
-                                    <h3 className="font-bold">
-                                        Original Language
-                                    </h3>
-                                    <p>
-                                        {intlNames.of(info.original_language) ||
-                                            "-"}
-                                    </p>
-                                </dd>
-                            )}
-                            {!!info.budget && (
-                                <dd>
-                                    <h3 className="font-bold">Budget</h3>
-                                    <p>
-                                        {intlNumber.format(info.budget) || "-"}
-                                    </p>
-                                </dd>
-                            )}
-                            {!!info.revenue && (
-                                <dd>
-                                    <h3 className="font-bold">Revenue</h3>
-                                    <p>
-                                        {intlNumber.format(info.revenue) || "-"}
-                                    </p>
-                                </dd>
-                            )}
-                        </dl>
-                    </div>
-                </section>
-            )}
-            <section className="p-6">
-                <h2 className="font-bold text-3xl">Cast</h2>
-                <ul className="overflow-x-scroll">
-                    <li className="flex items-stretch gap-4 py-4">
-                        {info.credits.cast.map((c: any) => (
-                            <CastCard cast={c} />
-                        ))}
-                    </li>
-                </ul>
-            </section>
-
-            {info.recommendations.results.length > 0 && (
-                <section className="p-6 bg-secondary/80">
-                    <h2 className="font-bold text-3xl">You might also like</h2>
-                    <ul className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                        {info.recommendations.results.map((r: any) => (
-                            <li>
-                                <ResultItem
-                                    className="bg-background rounded-lg"
-                                    info={r}
-                                    key={r.id}
-                                />
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            )}
-        </main>
-    );
+								background: {
+									fill: "rgba(25,25,25)",
+								},
+							}}
+						/>
+						<span className="font-bold">Score</span>
+					</div>
+					<p className="text-sm text-primary/60 italic">
+						{data?.tagline || "-"}
+					</p>
+					<h3 className="font-bold mt-2">Overview</h3>
+					<p className="max-w-4xl text-justify">
+						{data?.overview || "-"}
+					</p>
+					{!!data?.credits?.crew?.length && (
+						<dl className="grid grid-cols-3 gap-y-5 mt-8 text-sm">
+							{crew?.director && (
+								<dd>
+									<h3 className="font-semibold">Director</h3>
+									{crew.director}
+								</dd>
+							)}
+							{crew?.producer && (
+								<dd>
+									<h3 className="font-semibold">Producer</h3>
+									{crew.producer}
+								</dd>
+							)}
+							{crew?.writer && (
+								<dd>
+									<h3 className="font-semibold">Writer</h3>
+									{crew.writer}
+								</dd>
+							)}
+							{crew?.characters && (
+								<dd>
+									<h3 className="font-semibold">
+										Characters
+									</h3>
+									{crew.characters}
+								</dd>
+							)}
+						</dl>
+					)}
+				</div>
+			</section>
+			<div className="bg-background/65 p-6 mt-12">
+				{!!data?.credits?.cast?.length && (
+					<section className="my-12">
+						<h2 className="text-2xl font-bold">Cast</h2>
+						<MediaCarousel>
+							{data.credits.cast.map((c: any) => (
+								<MediaCard
+									id={c.id}
+									media_type="person"
+									imagePath={c.profile_path}
+									title={c.name}
+									character={c.character}
+									key={c.id}
+								/>
+							))}
+						</MediaCarousel>
+					</section>
+				)}
+				{!!data?.videos?.results?.length && (
+					<section className="flex justify-evenly my-20">
+						<div className="flex space-x-8 justify-self-center">
+							<div>
+								<h2 className="text-2xl font-bold mb-4">
+									Latest Video
+								</h2>
+								<iframe
+									className="rounded-lg"
+									width="560"
+									height="315"
+									src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
+									title="YouTube video player"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									referrerPolicy="strict-origin-when-cross-origin"
+									allowFullScreen
+								></iframe>
+							</div>
+							<dl className="space-y-6 mt-12">
+								<dd>
+									<h3 className="font-semibold">Status</h3>
+									<p>{data.status}</p>
+								</dd>
+								<dd>
+									<h3 className="font-semibold">
+										Original Language
+									</h3>
+									<p>
+										{getDisplayName.of(
+											data.original_language
+										)}
+									</p>
+								</dd>
+								<dd>
+									<h3 className="font-semibold">Budget</h3>
+									<p>{intlCurrency.format(data.budget)}</p>
+								</dd>
+								<dd>
+									<h3 className="font-semibold">Revenue</h3>
+									<p>{intlCurrency.format(data.revenue)}</p>
+								</dd>
+							</dl>
+						</div>
+						{!!data?.keywords?.results?.length && (
+							<div className="bg-secondary p-4 rounded-md max-w-[300px]">
+								<h2 className="text-2xl font-bold mb-4">
+									Keywords
+								</h2>
+								<ul className="flex flex-wrap gap-2 ">
+									{data.keywords.results.map((k: any) => (
+										<li className="bg-primary/40 rounded-md w-fit px-2">
+											<Link
+												href={`/search/keyword/${k.id}`}
+											>
+												{k.name}
+											</Link>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+					</section>
+				)}
+				<section>
+					<h1 className="text-2xl font-semibold mb-4">
+						You might also like
+					</h1>
+					<ul className="grid grid-cols-3 gap-6">
+						{data.recommendations.results.map((r: any) => (
+							<ResultCard
+								id={r.id}
+								imagePath={r.poster_path}
+								title={r?.title || r.name}
+								overview={r.overview}
+								releaseDate={
+									r?.release_date || r.first_air_date
+								}
+								mediaType={r.media_type}
+							/>
+						))}
+					</ul>
+				</section>
+			</div>
+		</main>
+	);
 }

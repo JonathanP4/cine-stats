@@ -1,33 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-        remotePatterns: [
-            {
-                protocol: "https",
-                hostname: "media.themoviedb.org",
-                port: "",
-                pathname: "/t/p/w300_and_h450_bestv2/**",
-            },
-            {
-                protocol: "https",
-                hostname: "media.themoviedb.org",
-                port: "",
-                pathname: "/t/p/original/**",
-            },
-            {
-                protocol: "https",
-                hostname: "media.themoviedb.org",
-                port: "",
-                pathname: "/t/p/originalnull",
-            },
-            {
-                protocol: "http",
-                hostname: "/",
-                port: "",
-                pathname: "/images/**",
-            },
-        ],
-    },
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				port: "",
+				hostname: "image.tmdb.org",
+				pathname: "/t/p/**",
+			},
+		],
+	},
 };
 
 export default nextConfig;

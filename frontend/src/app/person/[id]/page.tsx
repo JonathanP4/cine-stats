@@ -1,105 +1,232 @@
 "use client";
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { BASE_IMG_URL } from "@/components/ResultItem";
-import { Card } from "@/components/trending/Card";
-import { MediaCarousel } from "@/components/trending/MediaCarousel";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { CaretDownIcon, CaretUpIcon } from "@radix-ui/react-icons";
+import { MediaCarousel } from "@/components/MediaCarousel";
+import { MediaCard } from "@/components/MediaCard";
+import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
+import Link from "next/link";
 import { DateTime } from "luxon";
 
 type Params = {
-    params: {
-        id: string;
-    };
+	params: {
+		id: string;
+	};
 };
 
-export default function PersonPage({ params }: Params) {
-    const [data, setData] = useState<any>();
-    useEffect(() => {
-        (async function fetchPersonDetails() {
-            const { data } = await api.post(`/details/person/${params.id}`, {
-                language: navigator.language,
-                append_to_response: "combined_credits",
-            });
-            console.log(data);
-            setData(data);
-        })();
-    }, []);
+export default function PersonDetailsPage({ params }: Params) {
+	const [person, setPerson] = useState<any>();
+	const [showFullBiography, setShowFullBiohraphy] = useState(false);
 
-    if (!data) return <LoadingSpinner />;
+	const fetchPersonData = async () => {
+		const { data } = await api.post("/details", {
+			media_type: "person",
+			id: params.id,
+			language: navigator.language,
+			append_to_response: "external_ids,images,combined_credits",
+		});
+		console.log(data);
 
-    let gender;
-    switch (data.gender) {
-        case 1:
-            gender = "Female";
-            break;
-        case 2:
-            gender = "Male";
-            break;
-        default:
-            gender = "Non-binary";
-    }
+		setPerson(data);
+	};
 
-    const now = DateTime.now();
-    const birthDate = DateTime.fromISO(data.birthday);
+	useEffect(() => {
+		fetchPersonData();
+	}, []);
 
-    const birthday = DateTime.fromISO(data.birthday).toLocaleString({
-        dateStyle: "long",
-    });
+	if (!person) return <LoadingSpinner />;
 
-    const age = Math.round(now.diff(birthDate, "years").years);
+	let gender = "--";
 
-    return (
-        <main className="p-6">
-            <div className="flex items-start gap-x-6">
-                <section>
-                    <figure className="rounded-md">
-                        <Image
-                            className="rounded-md min-w-[300px]"
-                            width={300}
-                            height={450}
-                            src={BASE_IMG_URL + data.profile_path}
-                            alt={data.name + " profile"}
-                        />
-                    </figure>
-                    <h2 className="text-xl font-bold my-2">Personal Info</h2>
-                    <dl className="space-y-4">
-                        <dd>
-                            <h2 className="font-semibold">Known for</h2>
-                            <p>{data.known_for_department}</p>
-                        </dd>
-                        <dd>
-                            <h2 className="font-semibold">Known Credits</h2>
-                            <p>{data.combined_credits.cast.length - 1}</p>
-                        </dd>
-                        <dd>
-                            <h2 className="font-semibold">Gender</h2>
-                            <p>{gender}</p>
-                        </dd>
-                        <dd>
-                            <h2 className="font-semibold">Birthday</h2>
-                            <p>
-                                {birthday}
-                                <span className="text-white/50">{` (${age} years old)`}</span>
-                            </p>
-                        </dd>
-                    </dl>
-                </section>
-                <section className="max-w-[1024px] min-w-96">
-                    <h1 className="font-bold text-3xl mb-6">{data.name}</h1>
-                    <h2 className="text-lg font-semibold mb-2">Biography</h2>
-                    <p className="mb-6">{data.biography}</p>
-                    <h2 className="text-lg font-semibold mb-2">Known for</h2>
+	if (person?.gender) {
+		if (person.gender === 1) gender = "Female";
+		else if (person.gender === 2) gender = "Male";
+		else gender = "Non Binary";
+	}
 
-                    <MediaCarousel containerWidth={window.innerWidth - 400}>
-                        {data.combined_credits.cast.map((c: any) => (
-                            <Card data={c} />
-                        ))}
-                    </MediaCarousel>
-                </section>
-            </div>
-        </main>
-    );
+	const age =
+		Math.floor(
+			DateTime.now()
+				.diff(DateTime.fromISO(person.birthday), "years")
+				.toObject().years || NaN
+		) || "--";
+
+	return (
+		<main className="p-6">
+			<div className="flex gap-x-6">
+				<section>
+					<figure className="min-w-[300px] rounded-md">
+						<Image
+							className="object-cover rounded-md"
+							src={`https://image.tmdb.org/t/p/original${person.profile_path}`}
+							width={300}
+							height={450}
+							alt={person.name + " picture"}
+						/>
+					</figure>
+					<div>
+						{person?.external_ids && (
+							<ul className="flex items-center gap-x-4 mt-4 mb-8">
+								{person.external_ids?.facebook_id && (
+									<li>
+										<Link
+											href={`https://www.facebook.com/${person.external_ids.facebook_id}`}
+										>
+											<FaFacebook size={30} />
+										</Link>
+									</li>
+								)}
+								{person.external_ids?.twitter_id && (
+									<li>
+										<Link
+											href={`https://x.com/${person.external_ids.twitter_id}`}
+										>
+											<FaTwitter size={30} />
+										</Link>
+									</li>
+								)}
+								{person.external_ids.instagram_id && (
+									<li>
+										<Link
+											href={`https://www.instagram.com/${person.external_ids.instagram_id}`}
+										>
+											<FaInstagram size={30} />
+										</Link>
+									</li>
+								)}
+							</ul>
+						)}
+						<h2 className="text-xl font-semibold mb-2">
+							Personal Info
+						</h2>
+						<dl className="space-y-4">
+							<dd>
+								<dt className="font-semibold mb-1">
+									Known For
+								</dt>
+								<p className="text-sm">
+									{person.known_for_department}
+								</p>
+							</dd>
+							<dd>
+								<dt className="font-semibold mb-1">
+									Known Credits
+								</dt>
+								<p className="text-sm">
+									{person.known_for_department === "Acting"
+										? person.combined_credits.cast.length
+										: person.combined_credits.crew.length}
+								</p>
+							</dd>
+							<dd>
+								<dt className="font-semibold mb-1">Gender</dt>
+								<p className="text-sm">{gender}</p>
+							</dd>
+							<dd>
+								<dt className="font-semibold mb-1">Birthday</dt>
+								<p className="text-sm">
+									{DateTime.fromISO(
+										person.birthday
+									).toLocaleString({ dateStyle: "long" })}
+									{` (${age} years old)`}
+								</p>
+							</dd>
+							<dd>
+								<dt className="font-semibold mb-1">
+									Place of Birth
+								</dt>
+								<p className="text-sm">
+									{person.place_of_birth}
+								</p>
+							</dd>
+							<dd>
+								<dt className="font-semibold mb-1">
+									Alson Known As
+								</dt>
+								<ul className="space-y-3">
+									{person.also_known_as.map((k: any) => (
+										<li className="text-sm">{k}</li>
+									))}
+								</ul>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section className="max-w-[1000px] min-w-[400px] w-full">
+					<h1 className="text-3xl font-bold mb-6">{person.name}</h1>
+					<h2 className="text-lg font-semibold mb-2">Biography</h2>
+					<p className={showFullBiography ? "" : "line-clamp-6"}>
+						{person.biography || "No biohraphy avaliable"}
+					</p>
+					{person?.biography?.length > 719 && (
+						<Button
+							onClick={() => setShowFullBiohraphy((s) => !s)}
+							className="bg-transparent hover:bg-transparent hover:text-blue-400 text-primary p-0"
+						>
+							{!showFullBiography ? "Read More" : "Show Less"}
+							{!showFullBiography ? (
+								<CaretDownIcon />
+							) : (
+								<CaretUpIcon />
+							)}
+						</Button>
+					)}
+					{person?.combined_credits?.cast && (
+						<div className="max-w-full relative">
+							<h2 className="text-lg font-semibold mb-1 mt-4">
+								Appears on
+							</h2>
+							<MediaCarousel>
+								{person?.known_for_department === "Acting"
+									? person.combined_credits.cast
+											.slice(0, 20)
+											.map((c: any) => (
+												<MediaCard
+													id={c.id}
+													media_type={c.media_type}
+													imagePath={c.poster_path}
+													title={c?.title || c.name}
+													character={c.character}
+												/>
+											))
+									: ""}
+							</MediaCarousel>
+						</div>
+					)}
+					{person?.images?.profiles && (
+						<div className="max-w-full relative">
+							<h2 className="text-lg font-semibold mt-8">
+								Pictures
+							</h2>
+
+							<MediaCarousel>
+								{person.images.profiles.map(
+									(p: any, i: number) => (
+										<Link
+											href={`https://image.tmdb.org/t/p/original${p.file_path}`}
+											target="_blank"
+										>
+											<figure className="overflow-hidden min-w-[200px] p-2 border-[2px] border-secondary rounded-md">
+												<Image
+													className="rounded-md hover:scale-105 transition-all"
+													src={`https://image.tmdb.org/t/p/original${p.file_path}`}
+													alt={"image " + i}
+													width={200}
+													height={265}
+												/>
+											</figure>
+										</Link>
+									)
+								)}
+							</MediaCarousel>
+						</div>
+					)}
+				</section>
+			</div>
+		</main>
+	);
 }

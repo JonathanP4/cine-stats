@@ -1,89 +1,145 @@
 "use client";
 
-import { SearchBar } from "@/components/SearchBar";
-import { useEffect, useState } from "react";
+import { MediaCard } from "@/components/MediaCard";
+import { MediaCarousel } from "@/components/MediaCarousel";
+import { Searchbar } from "@/components/Searchbar";
+import { TimeFrameSelector } from "@/components/TimeFrameSelector";
 import { api } from "@/lib/axios";
-import { Card } from "@/components/trending/Card";
-import { MediaCarousel } from "@/components/trending/MediaCarousel";
+import { Auth } from "@/store/Auth";
+import { useEffect, useState } from "react";
 
-type MediaData = {
-    movies: ResultsData;
-    tv: ResultsData;
+type TimeFrameState = {
+	movie: TimeFrames;
+	tv: TimeFrames;
+	person: TimeFrames;
 };
 
 export default function Home() {
-    const [data, setData] = useState<MediaData | null>();
-    const [timeFrame, setTimeFrame] = useState<TimeFrameState>({
-        movie: "day",
-        tv: "day",
-    });
+	const [movieData, setMovieData] = useState<any>([]);
+	const [tvData, setTvData] = useState<any>([]);
+	const [personData, setPersonData] = useState<any>([]);
 
-    useEffect(() => {
-        (async function fetchPopularMovies() {
-            const { data } = await api.post(
-                `/trending/movie/${timeFrame.movie}`,
-                {
-                    language: navigator.language,
-                }
-            );
+	const [currentMediaType, setCurrentMediaType] =
+		useState<MediaTypes>("movie");
+	const [timeFrame, setTimeFrame] = useState<TimeFrameState>({
+		movie: "day",
+		tv: "day",
+		person: "day",
+	});
 
-            setData((s: any) => ({ ...s, movies: data }));
-        })();
-    }, [timeFrame.movie]);
+	const fetchTrending = async (type: MediaTypes) => {
+		try {
+			const { data } = await api.post("/trending", {
+				media_type: type,
+				time_frame: timeFrame[type],
+				language: navigator.language,
+			});
+			console.log(data);
 
-    useEffect(() => {
-        (async function fetchPopularTvSeries() {
-            const { data } = await api.post(`/trending/tv/${timeFrame.tv}`, {
-                language: navigator.language,
-            });
+			switch (type) {
+				case "movie":
+					setMovieData(data);
+					break;
+				case "tv":
+					setTvData(data);
+					break;
+				default:
+					setPersonData(data);
+					break;
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
-            setData((s: any) => ({ ...s, tv: data }));
-        })();
-    }, [timeFrame.tv]);
+	const changeTimeFrame = (timeFrame: TimeFrames, mediaType: MediaTypes) => {
+		setTimeFrame((s) => ({ ...s, [mediaType]: timeFrame }));
+		setCurrentMediaType(mediaType);
+	};
 
-    const changeTimeFrame = (timeFrame: TimeFrames, type: MediaTypes) => {
-        setTimeFrame((s: any) => ({ ...s, [type]: timeFrame }));
-    };
+	useEffect(() => {
+		["movie", "tv", "person"].forEach((t: any) => fetchTrending(t));
+	}, []);
 
-    return (
-        <main className="p-6">
-            <SearchBar />
-            {data?.movies && (
-                <section className="mt-12">
-                    <h2 className="text-2xl font-semibold mb-2">
-                        Trending Movies
-                    </h2>
+	useEffect(() => {
+		fetchTrending(currentMediaType);
+	}, [timeFrame, currentMediaType]);
 
-                    <MediaCarousel
-                        type={"movie"}
-                        changeTimeFrame={changeTimeFrame}
-                        timeFrame={timeFrame.movie}
-                        className="mt-4"
-                    >
-                        {data.movies.results.map((m: MovieData) => (
-                            <Card data={m} key={m.id} />
-                        ))}
-                    </MediaCarousel>
-                </section>
-            )}
-            {data?.tv && (
-                <section className="mt-12">
-                    <h2 className="text-2xl font-semibold mb-2">
-                        Trending Tv Series
-                    </h2>
-
-                    <MediaCarousel
-                        type={"tv"}
-                        changeTimeFrame={changeTimeFrame}
-                        timeFrame={timeFrame.tv}
-                        className="mt-4"
-                    >
-                        {data.tv.results.map((t: TvData) => (
-                            <Card data={t} key={t.id} />
-                        ))}
-                    </MediaCarousel>
-                </section>
-            )}
-        </main>
-    );
+	return (
+		<main className="p-6 space-y-10">
+			<Searchbar className="m-auto" />
+			{movieData?.results && (
+				<section>
+					<h1 className="text-3xl font-semibold mb-4">
+						Trending Movies
+					</h1>
+					<TimeFrameSelector
+						timeFrame={timeFrame.movie}
+						mediaType="movie"
+						changeTimeFrame={changeTimeFrame}
+					/>
+					<MediaCarousel>
+						{movieData.results.map((r: any) => (
+							<MediaCard
+								key={r.id}
+								id={r.id}
+								media_type={r.media_type}
+								title={r.title}
+								releaseDate={r.release_date}
+								imagePath={r.poster_path}
+							/>
+						))}
+					</MediaCarousel>
+				</section>
+			)}
+			{tvData?.results && (
+				<section>
+					<h1 className="text-3xl font-semibold mb-4">
+						Trending Tv Series
+					</h1>
+					<TimeFrameSelector
+						timeFrame={timeFrame.tv}
+						mediaType="tv"
+						changeTimeFrame={changeTimeFrame}
+					/>
+					<MediaCarousel>
+						{tvData.results.map((r: any) => (
+							<MediaCard
+								key={r.id}
+								id={r.id}
+								media_type={r.media_type}
+								title={r.name}
+								releaseDate={r.first_air_date}
+								imagePath={r.poster_path}
+							/>
+						))}
+					</MediaCarousel>
+				</section>
+			)}
+			{personData?.results && (
+				<section>
+					<h1 className="text-3xl font-semibold mb-4">
+						Popular People
+					</h1>
+					<TimeFrameSelector
+						timeFrame={timeFrame.person}
+						mediaType="person"
+						changeTimeFrame={changeTimeFrame}
+					/>
+					<MediaCarousel>
+						{personData.results.map((r: any) => (
+							<MediaCard
+								key={r.id}
+								id={r.id}
+								media_type={r.media_type}
+								title={r.name}
+								known_for={r.known_for}
+								imagePath={r.profile_path}
+							/>
+						))}
+					</MediaCarousel>
+				</section>
+			)}
+		</main>
+	);
 }
