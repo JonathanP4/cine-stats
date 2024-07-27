@@ -125,7 +125,7 @@ export default function SerachPage({ params }: Params) {
 										key={r.id}
 										id={r.id}
 										imagePath={r.poster_path}
-										mediaType={r.media_type}
+										mediaType={mediaType}
 										overview={r.overview}
 										title={r?.title || r.name}
 										releaseDate={
