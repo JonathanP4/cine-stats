@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const router = useRouter();
 
 	useEffect(() => {
-		const authObserver = onAuthStateChanged(auth, (user: User) => {
+		const authObserver = onAuthStateChanged(auth, (user: User | null) => {
 			if (user) {
 				setUser(user);
 			} else {
