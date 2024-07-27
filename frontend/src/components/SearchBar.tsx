@@ -2,12 +2,32 @@ import { Input } from "./ui/input";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export function SearchBar({ className }: { className?: string }) {
+type Props = {
+	query?: string;
+	className?: string;
+};
+
+export function SearchBar({ query, className }: Props) {
+	const [input, setInput] = useState(query?.replaceAll("%20", " ") || "");
+	const router = useRouter();
+
+	const submitHandler = (e: FormEvent) => {
+		e.preventDefault();
+		router.push(`/search/${input}?page=1`);
+	};
+
 	return (
-		<form className={cn("max-w-lg w-full", className)}>
+		<form
+			onSubmit={submitHandler}
+			className={cn("max-w-lg w-full", className)}
+		>
 			<div className="flex items-center">
 				<Input
+					value={input}
+					onChange={(e) => setInput(e.target.value)}
 					placeholder="Search for a movie, tv series or person"
 					className="py-4 rounded-r-none focus-visible:ring-0 focus-visible:border-primary"
 				/>

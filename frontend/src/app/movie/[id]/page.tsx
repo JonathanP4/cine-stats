@@ -134,11 +134,11 @@ export default function DetailsPage({ params }: Props) {
 							{!!data?.genres?.length && (
 								<>
 									<span className="mx-2">|</span>
-									<dd>
+									<span>
 										{data.genres
 											.map((g: any) => g.name)
 											.join(",")}
-									</dd>
+									</span>
 									<span className="mx-2">|</span>
 								</>
 							)}
@@ -280,7 +280,10 @@ export default function DetailsPage({ params }: Props) {
 							</h2>
 							<ul className="flex flex-wrap gap-2 ">
 								{data.keywords.keywords.map((k: any) => (
-									<li className="bg-primary/40 rounded-md w-fit px-2">
+									<li
+										key={k.id}
+										className="bg-primary/40 rounded-md w-fit px-2"
+									>
 										<Link href={`/search/keyword/${k.id}`}>
 											{k.name}
 										</Link>
@@ -297,6 +300,7 @@ export default function DetailsPage({ params }: Props) {
 					<ul className="grid grid-cols-3 gap-6">
 						{data.recommendations.results.map((r: any) => (
 							<ResultCard
+								key={r.id}
 								id={r.id}
 								imagePath={r.poster_path}
 								title={r?.title || r.name}

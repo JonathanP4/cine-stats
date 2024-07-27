@@ -149,7 +149,9 @@ export default function PersonDetailsPage({ params }: Params) {
 								</dt>
 								<ul className="space-y-3">
 									{person.also_known_as.map((k: any) => (
-										<li className="text-sm">{k}</li>
+										<li key={k} className="text-sm">
+											{k}
+										</li>
 									))}
 								</ul>
 							</dd>
@@ -186,6 +188,7 @@ export default function PersonDetailsPage({ params }: Params) {
 											.slice(0, 20)
 											.map((c: any) => (
 												<MediaCard
+													key={c.id}
 													id={c.id}
 													media_type={c.media_type}
 													imagePath={c.poster_path}
@@ -207,6 +210,7 @@ export default function PersonDetailsPage({ params }: Params) {
 								{person.images.profiles.map(
 									(p: any, i: number) => (
 										<Link
+											key={p.file_path}
 											href={`https://image.tmdb.org/t/p/original${p.file_path}`}
 											target="_blank"
 										>
