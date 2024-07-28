@@ -4,7 +4,10 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { MediaCard } from "@/components/MediaCard";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { ResultCard } from "@/components/ResultCard";
+import { getBookmark, updateUserBookmarks } from "@/firebase/db";
 import { api } from "@/lib/axios";
+import { Auth } from "@/store/Auth";
+import { HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +21,9 @@ type Props = {
 
 export default function DetailsPage({ params }: Props) {
 	const [data, setData] = useState<any>();
+	const [bookmark, setBookmark] = useState(false);
+
+	const { user } = Auth();
 
 	const fetchMediaInfo = async () => {
 		const { data } = await api.post("/details", {
@@ -33,6 +39,23 @@ export default function DetailsPage({ params }: Props) {
 	useEffect(() => {
 		fetchMediaInfo();
 	}, []);
+
+	useEffect(() => {
+		async function bookmarkExists() {
+			if (!user || !data) return;
+			const exists = await getBookmark(user.uid, data.id);
+			console.log(exists);
+
+			setBookmark(!!exists);
+		}
+		bookmarkExists();
+	}, [user, data]);
+
+	useEffect(() => {
+		if (!user || !data) return;
+		const fullData = { ...data, media_type: "movie" };
+		updateUserBookmarks(user.uid, data.id, bookmark ? fullData : null);
+	}, [bookmark, data]);
 
 	if (!data) return <LoadingSpinner />;
 
@@ -88,6 +111,22 @@ export default function DetailsPage({ params }: Props) {
 			/>
 			<section className="flex gap-x-8 p-6">
 				<figure className="rounded-md">
+					{user && (
+						<div
+							onClick={() => setBookmark((s) => !s)}
+							className="absolute m-2 bg-secondary/50 rounded-full p-2 cursor-pointer"
+						>
+							{bookmark ? (
+								<HeartFilledIcon
+									color="#ff0000"
+									width={25}
+									height={25}
+								/>
+							) : (
+								<HeartIcon width={25} height={25} />
+							)}
+						</div>
+					)}
 					<Image
 						className="rounded-md"
 						src={
@@ -293,25 +332,27 @@ export default function DetailsPage({ params }: Props) {
 						)}
 					</section>
 				)}
-				<section>
-					<h1 className="text-2xl font-semibold mb-4">
-						You might also like
-					</h1>
-					<ul className="grid grid-cols-3 gap-6">
-						{data.recommendations.results.map((r: any) => (
-							<ResultCard
-								id={r.id}
-								imagePath={r.poster_path}
-								title={r?.title || r.name}
-								overview={r.overview}
-								releaseDate={
-									r?.release_date || r.first_air_date
-								}
-								mediaType={r.media_type}
-							/>
-						))}
-					</ul>
-				</section>
+				{!!data.recommendations.results.length && (
+					<section>
+						<h1 className="text-2xl font-semibold mb-4">
+							You might also like
+						</h1>
+						<ul className="grid grid-cols-3 gap-6">
+							{data.recommendations.results.map((r: any) => (
+								<ResultCard
+									id={r.id}
+									imagePath={r.poster_path}
+									title={r?.title || r.name}
+									overview={r.overview}
+									releaseDate={
+										r?.release_date || r.first_air_date
+									}
+									mediaType={r.media_type}
+								/>
+							))}
+						</ul>
+					</section>
+				)}
 			</div>
 		</main>
 	);

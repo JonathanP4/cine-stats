@@ -1,6 +1,7 @@
-import { child, getDatabase, push, ref, set, update } from "firebase/database";
+import { child, get, getDatabase, ref, set, update } from "firebase/database";
+import { app } from "./app";
 
-const db = getDatabase();
+const db = getDatabase(app);
 
 export function writeUserData(
 	userId: string,
@@ -8,11 +9,15 @@ export function writeUserData(
 	email: string,
 	imageUrl: string
 ) {
-	set(ref(db, "users/" + userId), {
-		username: name,
-		email: email,
-		profile_picture: imageUrl,
-	});
+	try {
+		set(ref(db, "users/" + userId), {
+			username: name,
+			email: email,
+			profile_picture: imageUrl,
+		});
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 export function updateUserBookmarks(
@@ -22,14 +27,33 @@ export function updateUserBookmarks(
 ) {
 	const updates: any = {};
 
-	if (!bookmarkId) {
-		const newPostKey = push(
-			child(ref(db), `users/${userId}/bookmarks`)
-		).key;
-		updates[`users/${userId}/bookmarks/${newPostKey}`] = data;
-	} else {
-		updates[`users/${userId}/bookmarks/${bookmarkId}`] = data;
-	}
+	updates[`users/${userId}/bookmarks/${bookmarkId}`] = data;
 
 	return update(ref(db), updates);
+}
+
+export async function getBookmark(userId: string, bookmarkId: string) {
+	const dbRef = ref(db);
+	try {
+		const snapshot = await get(
+			child(dbRef, `users/${userId}/bookmarks/${bookmarkId}`)
+		);
+		if (snapshot.exists()) {
+			return snapshot.val();
+		} else {
+			return null;
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+export async function getUserBookmarks(userId: string) {
+	try {
+		let bookmarks = undefined;
+
+		return bookmarks;
+	} catch (error) {
+		console.log(error);
+	}
 }

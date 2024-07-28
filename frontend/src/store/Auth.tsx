@@ -21,10 +21,10 @@ import {
 } from "react";
 
 type AuthContext = {
-	passwordSignup: (email: string, password: string) => void;
-	passwordSignin: (email: string, password: string) => void;
-	oAuth: (provider: "GOOGLE" | "GITHUB") => void;
-	logout: () => void;
+	passwordSignup: (email: string, password: string) => Promise<void>;
+	passwordSignin: (email: string, password: string) => Promise<void>;
+	oAuth: (provider: "GOOGLE" | "GITHUB") => Promise<void>;
+	logout: () => Promise<void>;
 	user: User | null;
 };
 

@@ -39,7 +39,8 @@ export function ResultCard({
 					/>
 				</figure>
 				<div className="pr-4">
-					<p className="line-clamp-3">
+					<h1 className="text-lg font-semibold">{title}</h1>
+					<p className="line-clamp-2">
 						{overview || "No overview avaliable"}
 					</p>
 					<p className="text-sm text-primary/70">

@@ -29,7 +29,7 @@ export function MediaCard({
 		>
 			<figure className="rounded-t-md overflow-hidden">
 				<Image
-					className=" transition-all duration-300 rounded-t-md hover:scale-105 min-h-[277.5px] object-cover"
+					className="transition-all duration-300 rounded-t-md hover:scale-105 min-h-[277.5px] object-cover"
 					src={
 						imagePath
 							? "https://image.tmdb.org/t/p/original" + imagePath
