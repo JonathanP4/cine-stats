@@ -60,7 +60,7 @@ export default function PersonDetailsPage({ params }: Params) {
 			<div className="flex gap-x-6">
 				<section>
 					<figure className="min-w-[300px] rounded-md">
-						<Image
+						<img
 							className="object-cover rounded-md"
 							src={`https://image.tmdb.org/t/p/original${person.profile_path}`}
 							width={300}
@@ -215,7 +215,7 @@ export default function PersonDetailsPage({ params }: Params) {
 											target="_blank"
 										>
 											<figure className="overflow-hidden min-w-[200px] p-2 border-[2px] border-secondary rounded-md">
-												<Image
+												<img
 													className="rounded-md hover:scale-105 transition-all"
 													src={`https://image.tmdb.org/t/p/original${p.file_path}`}
 													alt={"image " + i}

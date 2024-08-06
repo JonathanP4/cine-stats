@@ -102,7 +102,7 @@ export default function DetailsPage({ params }: Props) {
 
 	return (
 		<main className="relative">
-			<Image
+			<img
 				className="fixed -z-10 opacity-20 top-0 left-0"
 				src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
 				alt="a"
@@ -127,7 +127,7 @@ export default function DetailsPage({ params }: Props) {
 							)}
 						</div>
 					)}
-					<Image
+					<img
 						className="rounded-md"
 						src={
 							data?.poster_path
@@ -138,7 +138,7 @@ export default function DetailsPage({ params }: Props) {
 						width={300}
 						height={450}
 						alt={data.title + " poster"}
-					></Image>
+					/>
 				</figure>
 				<div className="basis-[70%]">
 					<div>

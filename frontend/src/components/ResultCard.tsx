@@ -26,7 +26,7 @@ export function ResultCard({
 				href={`/${mediaType}/${id}`}
 			>
 				<figure className="rounded-l-md w-[94px] h-[141px]">
-					<Image
+					<img
 						src={`${
 							imagePath
 								? `https://image.tmdb.org/t/p/original/${imagePath}`

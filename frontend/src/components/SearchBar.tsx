@@ -16,7 +16,7 @@ export function SearchBar({ query, className }: Props) {
 
 	const submitHandler = (e: FormEvent) => {
 		e.preventDefault();
-		router.push(`/search/${input}?page=1`);
+		router.push(`/search/${input}`);
 	};
 
 	return (

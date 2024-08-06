@@ -2,125 +2,122 @@
 
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ResultCard } from "@/components/ResultCard";
-import { ResultsPagiation } from "@/components/ResultsPagination";
 import { SearchBar } from "@/components/SearchBar";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/axios";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoFilter } from "react-icons/io5";
 import { MediaCard } from "@/components/MediaCard";
+import { useInView } from "react-intersection-observer";
+import { ScaleLoader } from "react-spinners";
 
 type Params = {
-	params: { query: string; page: string };
+	params: { query: string };
 };
 
 export default function SerachPage({ params }: Params) {
-	console.log(params);
-
-	const searchParams = useSearchParams();
-	console.log(searchParams.get("page"));
-
-	const [page, setPage] = useState(+searchParams.get("page")!);
-	const [data, setData] = useState<any>();
+	const [page, setPage] = useState(1);
+	const [tmdbData, setTmdbData] = useState<any[]>([]);
 	const [mediaType, setMediaType] = useState("movie");
 
-	const pathName = usePathname();
-	const router = useRouter();
+	const { ref, inView } = useInView({ threshold: 1 });
 
 	const fetchSearchResults = async () => {
+		if (page >= 500) return;
+
 		const { data } = await api.post("/search", {
 			query: params.query,
 			language: navigator.language,
 			page,
 			media_type: mediaType,
 		});
-		setData(data);
+
+		setTmdbData((prev) => {
+			if (page > 1) {
+				return prev.concat(data.results);
+			} else {
+				return data.results;
+			}
+		});
 	};
 
 	useEffect(() => {
 		fetchSearchResults();
-		router.push(`${pathName}?page=${page}`);
-	}, [page, mediaType, searchParams]);
+	}, [page]);
 
-	if (!data) return <LoadingSpinner />;
+	useEffect(() => {
+		setPage(1);
+		setTmdbData([]);
+		fetchSearchResults();
+	}, [mediaType]);
 
-	const changePage = (page: number) => {
-		setPage(page);
-	};
+	if (!tmdbData) return <LoadingSpinner />;
+
+	useEffect(() => {
+		setPage((p) => p + 1);
+	}, [inView]);
 
 	return (
 		<main className="p-6">
 			<SearchBar query={params.query} className="m-auto" />
-			{data?.results && (
-				<div className="flex gap-x-6 mt-12">
-					<section>
-						<h1 className="bg-slate-500 px-4 py-2 rounded-t-md text-xl flex justify-between items-center">
-							Filter
-							<IoFilter />
-						</h1>
-						<RadioGroup
-							defaultValue="movies"
-							className="bg-secondary p-6 rounded-b-md text-lg w-[200px]"
-						>
-							<div className="flex items-center">
-								<RadioGroupItem
-									onClick={(e) =>
-										setMediaType(
-											(e.target as HTMLElement).id
-										)
-									}
-									value="movie"
-									id="movie"
-									checked={mediaType === "movie"}
-								/>
-								<Label
-									className="text-base ml-2"
-									htmlFor="movie"
-								>
-									Movies
-								</Label>
-							</div>
-							<div className="flex items-center">
-								<RadioGroupItem
-									onClick={(e) =>
-										setMediaType(
-											(e.target as HTMLElement).id
-										)
-									}
-									value="tv"
-									id="tv"
-									checked={mediaType === "tv"}
-								/>
-								<Label className="text-base ml-2" htmlFor="tv">
-									Tv Series
-								</Label>
-							</div>
-							<div className="flex items-center ">
-								<RadioGroupItem
-									onClick={(e) =>
-										setMediaType(
-											(e.target as HTMLElement).id
-										)
-									}
-									value="person"
-									id="person"
-									checked={mediaType === "person"}
-								/>
-								<Label
-									className="text-base ml-2"
-									htmlFor="person"
-								>
-									People
-								</Label>
-							</div>
-						</RadioGroup>
-					</section>
+
+			<div className="flex gap-x-6 mt-12">
+				<section>
+					<h1 className="bg-slate-500 px-4 py-2 rounded-t-md text-xl flex justify-between items-center">
+						Filter
+						<IoFilter />
+					</h1>
+					<RadioGroup
+						defaultValue="movies"
+						className="bg-secondary p-6 rounded-b-md text-lg w-[200px]"
+					>
+						<div className="flex items-center">
+							<RadioGroupItem
+								onClick={(e) =>
+									setMediaType((e.target as HTMLElement).id)
+								}
+								value="movie"
+								id="movie"
+								checked={mediaType === "movie"}
+							/>
+							<Label className="text-base ml-2" htmlFor="movie">
+								Movies
+							</Label>
+						</div>
+						<div className="flex items-center">
+							<RadioGroupItem
+								onClick={(e) =>
+									setMediaType((e.target as HTMLElement).id)
+								}
+								value="tv"
+								id="tv"
+								checked={mediaType === "tv"}
+							/>
+							<Label className="text-base ml-2" htmlFor="tv">
+								Tv Series
+							</Label>
+						</div>
+						<div className="flex items-center ">
+							<RadioGroupItem
+								onClick={(e) =>
+									setMediaType((e.target as HTMLElement).id)
+								}
+								value="person"
+								id="person"
+								checked={mediaType === "person"}
+							/>
+							<Label className="text-base ml-2" htmlFor="person">
+								People
+							</Label>
+						</div>
+					</RadioGroup>
+				</section>
+				{!!tmdbData.length && (
 					<section>
 						{mediaType !== "person" ? (
 							<ul className="space-y-6">
-								{data.results.map((r: any) => (
+								{tmdbData.map((r: any) => (
 									<ResultCard
 										key={r.id}
 										id={r.id}
@@ -135,8 +132,8 @@ export default function SerachPage({ params }: Params) {
 								))}
 							</ul>
 						) : (
-							<ul className="grid grid-cols-5 gap-4 justify-items-center">
-								{data.results.map((r: any) => (
+							<ul className="grid grid-cols-5 gap-6 justify-items-center">
+								{tmdbData.map((r: any) => (
 									<li>
 										<MediaCard
 											imagePath={r.profile_path}
@@ -148,14 +145,15 @@ export default function SerachPage({ params }: Params) {
 								))}
 							</ul>
 						)}
-						<ResultsPagiation
-							setPage={changePage}
-							page={page}
-							last={data.total_pages}
-						/>
+
+						{page < 500 && (
+							<div ref={ref} className="flex justify-center mt-6">
+								<ScaleLoader color="#424e61" />
+							</div>
+						)}
 					</section>
-				</div>
-			)}
+				)}
+			</div>
 		</main>
 	);
 }

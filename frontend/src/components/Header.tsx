@@ -10,7 +10,7 @@ export function Header() {
 		<header className="bg-secondary p-6">
 			<nav className="flex items-center justify-between">
 				<Link href={"/"}>
-					<Image
+					<img
 						src="/images/logo.png"
 						className="max-w-44"
 						alt="cine-stats logo"

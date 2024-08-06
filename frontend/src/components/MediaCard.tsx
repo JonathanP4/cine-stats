@@ -28,7 +28,7 @@ export function MediaCard({
 			className="rounded-md min-w-[185px] animate-in fade-in duration-500"
 		>
 			<figure className="rounded-t-md overflow-hidden">
-				<Image
+				<img
 					className="transition-all duration-300 rounded-t-md hover:scale-105 min-h-[277.5px] object-cover"
 					src={
 						imagePath
@@ -41,7 +41,7 @@ export function MediaCard({
 				/>
 			</figure>
 
-			<div className={`bg-secondary p-3 rounded-b-md h-[92px]`}>
+			<div className={`bg-secondary p-3 rounded-b-md h-[92px] w-[185px]`}>
 				<h3 className="font-semibold line-clamp-2">{title}</h3>
 				{releaseDate && (
 					<p className="text-sm text-primary/60">
