@@ -61,7 +61,7 @@ export default function PersonDetailsPage({ params }: Params) {
 				<section>
 					<figure className="min-w-[300px] rounded-md">
 						<img
-							className="object-cover rounded-md"
+							className="object-cover rounded-md m-auto"
 							src={`https://image.tmdb.org/t/p/original${person.profile_path}`}
 							width={300}
 							height={450}
@@ -177,7 +177,7 @@ export default function PersonDetailsPage({ params }: Params) {
 						</dl>
 					</div>
 				</section>
-				<section className="max-w-[320px] md:max-w-[1000px] md:min-w-[400px] w-full">
+				<section className="max-w-screen md:max-w-[1000px] md:min-w-[400px] w-full">
 					<h1 className="text-3xl font-bold mb-6">{person.name}</h1>
 					<h2 className="text-lg font-semibold mb-2">Biography</h2>
 					<p className={showFullBiography ? "" : "line-clamp-6"}>
