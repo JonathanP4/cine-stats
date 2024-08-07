@@ -30,7 +30,7 @@ export function MediaCarousel({ children, className }: Props) {
 			>
 				{children}
 			</div>
-			<div className="flex justify-between absolute left-2 right-2 top-1/2 -translate-y-1/2">
+			<div className="hidden md:flex justify-between absolute left-2 right-2 top-1/2 -translate-y-1/2">
 				<Button
 					onClick={() => scrollHandler("LEFT")}
 					className="bg-primary/50 rounded-full p-2 aspect-square backdrop-blur-md"
