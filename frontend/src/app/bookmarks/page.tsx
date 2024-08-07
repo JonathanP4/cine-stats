@@ -32,7 +32,7 @@ export default function BookmarksPage() {
 	return (
 		<main className="p-6">
 			{bookmarks && (
-				<ul className="grid grid-cols-6 justify-items-center">
+				<ul className="grid grid-cols-2 gap-6 justify-items-center lg:grid-cols-4 md:grid-cols-3 xl:grid-cols-5">
 					{bookmarks.map((b: any) => (
 						<li className="max-w-[185px]">
 							<MediaCard
