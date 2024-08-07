@@ -57,7 +57,7 @@ export default function PersonDetailsPage({ params }: Params) {
 
 	return (
 		<main className="p-6">
-			<div className="flex gap-x-6">
+			<div className="flex flex-col gap-x-6 md:flex-row">
 				<section>
 					<figure className="min-w-[300px] rounded-md">
 						<img
@@ -103,62 +103,81 @@ export default function PersonDetailsPage({ params }: Params) {
 						<h2 className="text-xl font-semibold mb-2">
 							Personal Info
 						</h2>
-						<dl className="space-y-4">
-							<dd>
-								<dt className="font-semibold mb-1">
-									Known For
-								</dt>
-								<p className="text-sm">
-									{person.known_for_department}
-								</p>
-							</dd>
-							<dd>
-								<dt className="font-semibold mb-1">
-									Known Credits
-								</dt>
-								<p className="text-sm">
-									{person.known_for_department === "Acting"
-										? person.combined_credits.cast.length
-										: person.combined_credits.crew.length}
-								</p>
-							</dd>
-							<dd>
-								<dt className="font-semibold mb-1">Gender</dt>
-								<p className="text-sm">{gender}</p>
-							</dd>
-							<dd>
-								<dt className="font-semibold mb-1">Birthday</dt>
-								<p className="text-sm">
-									{DateTime.fromISO(
-										person.birthday
-									).toLocaleString({ dateStyle: "long" })}
-									{` (${age} years old)`}
-								</p>
-							</dd>
-							<dd>
-								<dt className="font-semibold mb-1">
-									Place of Birth
-								</dt>
-								<p className="text-sm">
-									{person.place_of_birth}
-								</p>
-							</dd>
-							<dd>
-								<dt className="font-semibold mb-1">
-									Alson Known As
-								</dt>
-								<ul className="space-y-3">
-									{person.also_known_as.map((k: any) => (
-										<li key={k} className="text-sm">
-											{k}
-										</li>
-									))}
-								</ul>
-							</dd>
+						<dl className="grid grid-cols-2 gap-6 my-6 md:block md:space-y-4 md:my-0">
+							{person?.known_for_department && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Known For
+									</dt>
+									<p className="text-sm">
+										{person.known_for_department}
+									</p>
+								</dd>
+							)}
+							{person?.known_for_department && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Known Credits
+									</dt>
+									<p className="text-sm">
+										{person.known_for_department ===
+										"Acting"
+											? person.combined_credits.cast
+													.length
+											: person.combined_credits.crew
+													.length}
+									</p>
+								</dd>
+							)}
+							{gender && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Gender
+									</dt>
+									<p className="text-sm">{gender}</p>
+								</dd>
+							)}
+							{person?.birthday && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Birthday
+									</dt>
+									<p className="text-sm">
+										{DateTime.fromISO(
+											person.birthday
+										).toLocaleString({ dateStyle: "long" })}
+										{` (${age} years old)`}
+									</p>
+								</dd>
+							)}
+							{person?.place_of_birth && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Place of Birth
+									</dt>
+									<p className="text-sm">
+										{person.place_of_birth}
+									</p>
+								</dd>
+							)}
+							{!!person?.also_known_as.length && (
+								<dd>
+									<dt className="font-semibold mb-1">
+										Alson Known As
+									</dt>
+									<ul className="space-y-3">
+										{person.also_known_as.map((k: any) => (
+											<li key={k} className="text-sm">
+												{k}
+											</li>
+										))}
+									</ul>
+								</dd>
+							)}
 						</dl>
 					</div>
 				</section>
-				<section className="max-w-[1000px] min-w-[400px] w-full">
+				<section className="max-w-[320px] md:max-w-[1000px] md:min-w-[400px] w-full">
 					<h1 className="text-3xl font-bold mb-6">{person.name}</h1>
 					<h2 className="text-lg font-semibold mb-2">Biography</h2>
 					<p className={showFullBiography ? "" : "line-clamp-6"}>

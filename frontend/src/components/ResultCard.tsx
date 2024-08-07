@@ -20,7 +20,7 @@ export function ResultCard({
 	id,
 }: Props) {
 	return (
-		<li className="rounded-md bg-secondary shadow-lg shadow-white/15">
+		<li className="text-sm rounded-md bg-secondary shadow-lg shadow-white/15 md:text-base">
 			<Link
 				className="flex items-center gap-x-4"
 				href={`/${mediaType}/${id}`}
@@ -39,7 +39,9 @@ export function ResultCard({
 					/>
 				</figure>
 				<div className="pr-4">
-					<h1 className="text-lg font-semibold">{title}</h1>
+					<h1 className="text-lg font-semibold line-clamp-2">
+						{title}
+					</h1>
 					<p className="line-clamp-2">
 						{overview || "No overview avaliable"}
 					</p>

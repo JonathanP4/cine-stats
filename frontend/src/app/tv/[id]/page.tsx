@@ -9,7 +9,6 @@ import { api } from "@/lib/axios";
 import { Auth } from "@/store/Auth";
 import { HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
 import { DateTime } from "luxon";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CircularProgressbar } from "react-circular-progressbar";
@@ -67,7 +66,7 @@ export default function DetailsPage({ params }: Props) {
 				(navigator.language.split("-")[1] ||
 					navigator.language.toUpperCase())
 		)[0]
-		.release_dates.filter((rd: any) => rd.certification !== "")[0];
+		?.release_dates.filter((rd: any) => rd.certification !== "")[0];
 
 	const intlCurrency = new Intl.NumberFormat(navigator.language, {
 		currency: "usd",
@@ -101,7 +100,7 @@ export default function DetailsPage({ params }: Props) {
 	};
 
 	return (
-		<main className="relative">
+		<main className="relative text-sm md:text-base">
 			<img
 				className="fixed -z-10 opacity-20 top-0 left-0"
 				src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
@@ -109,7 +108,7 @@ export default function DetailsPage({ params }: Props) {
 				width={1376}
 				height={500}
 			/>
-			<section className="flex gap-x-8 p-6">
+			<section className="flex flex-col md:flex-row gap-8 p-8">
 				<figure className="rounded-md">
 					{user && (
 						<div
@@ -128,7 +127,7 @@ export default function DetailsPage({ params }: Props) {
 						</div>
 					)}
 					<img
-						className="rounded-md"
+						className="rounded-md m-auto"
 						src={
 							data?.poster_path
 								? "https://image.tmdb.org/t/p/w342" +
@@ -142,17 +141,19 @@ export default function DetailsPage({ params }: Props) {
 				</figure>
 				<div className="basis-[70%]">
 					<div>
-						<h1 className="text-3xl font-bold mb-1">
-							{data?.name || "--"}
-							<span className="text-primary/40 font-normal ml-2">
-								(
-								{DateTime.fromISO(data.first_air_date).get(
-									"year"
-								)}
-								)
-							</span>
-						</h1>
-						<dl className="flex items-center text-sm">
+						{data.name && (
+							<h1 className="text-3xl font-bold mb-1">
+								{data.name}
+								<span className="text-primary/40 font-normal ml-2">
+									(
+									{DateTime.fromISO(data.first_air_date).get(
+										"year"
+									)}
+									)
+								</span>
+							</h1>
+						)}
+						<dl className="flex items-center text-sm flex-wrap">
 							{ageRating?.certification && (
 								<dd className="border border-primary/30 px-2 rounded-sm">
 									{ageRating.certification}
@@ -188,7 +189,7 @@ export default function DetailsPage({ params }: Props) {
 							)}
 						</dl>
 					</div>
-					<div className="w-[140px] flex items-center gap-2 my-6">
+					<div className="m-auto w-[140px] flex items-center gap-2 my-6 md:mx-0">
 						<CircularProgressbar
 							background
 							value={voteAvg}
@@ -212,15 +213,17 @@ export default function DetailsPage({ params }: Props) {
 						/>
 						<span className="font-bold">Score</span>
 					</div>
-					<p className="text-sm text-primary/60 italic">
-						{data?.tagline || "-"}
-					</p>
+					{data?.tagline && (
+						<p className="text-sm text-primary/60 italic">
+							{data.tagline}
+						</p>
+					)}
 					<h3 className="font-bold mt-2">Overview</h3>
 					<p className="max-w-4xl text-justify">
-						{data?.overview || "-"}
+						{data.overview || "No overview avaliable"}
 					</p>
 					{!!data?.credits?.crew?.length && (
-						<dl className="grid grid-cols-3 gap-y-5 mt-8 text-sm">
+						<dl className="grid grid-cols-3 gap-5 mt-8 text-sm">
 							{crew?.director && (
 								<dd>
 									<h3 className="font-semibold">Director</h3>
@@ -270,14 +273,14 @@ export default function DetailsPage({ params }: Props) {
 					</section>
 				)}
 				{!!data?.videos?.results?.length && (
-					<section className="flex justify-evenly my-20">
-						<div className="flex space-x-8 justify-self-center">
+					<section className="flex flex-col my-20 justify-evenly lg:flex-row">
+						<div className="flex flex-col justify-self-center md:space-x-8 md:flex-row">
 							<div>
 								<h2 className="text-2xl font-bold mb-4">
 									Latest Video
 								</h2>
 								<iframe
-									className="rounded-lg"
+									className="rounded-lg max-w-[300px] max-h-[260px] sm:max-w-[560px] sm:max-h-[315px]"
 									width="560"
 									height="315"
 									src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
@@ -287,7 +290,7 @@ export default function DetailsPage({ params }: Props) {
 									allowFullScreen
 								></iframe>
 							</div>
-							<dl className="space-y-6 mt-12">
+							<dl className="grid grid-cols-2 items-baseline gap-y-4 my-6 md:block md:space-y-6 md:mt-12">
 								<dd>
 									<h3 className="font-semibold">Status</h3>
 									<p>{data.status}</p>
@@ -319,7 +322,10 @@ export default function DetailsPage({ params }: Props) {
 								</h2>
 								<ul className="flex flex-wrap gap-2 ">
 									{data.keywords.results.map((k: any) => (
-										<li className="bg-primary/40 rounded-md w-fit px-2">
+										<li
+											key={k.id}
+											className="bg-primary/40 rounded-md w-fit px-2"
+										>
 											<Link
 												href={`/search/keyword/${k.id}`}
 											>
@@ -337,7 +343,7 @@ export default function DetailsPage({ params }: Props) {
 						<h1 className="text-2xl font-semibold mb-4">
 							You might also like
 						</h1>
-						<ul className="grid grid-cols-3 gap-6">
+						<ul className="grid md:grid-cols-3 gap-6">
 							{data.recommendations.results.map((r: any) => (
 								<ResultCard
 									id={r.id}

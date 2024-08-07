@@ -68,7 +68,7 @@ export default function Home() {
 			<SearchBar className="m-auto" />
 			{movieData?.results && (
 				<section>
-					<h1 className="text-3xl font-semibold mb-4">
+					<h1 className="text-2xl font-semibold mb-4 md:text-3xl">
 						Trending Movies
 					</h1>
 					<TimeFrameSelector
@@ -92,7 +92,7 @@ export default function Home() {
 			)}
 			{tvData?.results && (
 				<section>
-					<h1 className="text-3xl font-semibold mb-4">
+					<h1 className="text-2xl font-semibold mb-4 md:text-3xl">
 						Trending Tv Series
 					</h1>
 					<TimeFrameSelector
@@ -116,7 +116,7 @@ export default function Home() {
 			)}
 			{personData?.results && (
 				<section>
-					<h1 className="text-3xl font-semibold mb-4">
+					<h1 className="text-2xl font-semibold mb-4 md:text-3xl">
 						Popular People
 					</h1>
 					<TimeFrameSelector

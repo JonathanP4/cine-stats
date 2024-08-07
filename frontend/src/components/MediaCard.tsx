@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
 
@@ -25,11 +24,11 @@ export function MediaCard({
 	return (
 		<Link
 			href={`/${media_type}/${id}`}
-			className="rounded-md min-w-[185px] animate-in fade-in duration-500"
+			className="rounded-md min-w-[150px] text-sm animate-in fade-in duration-500 md:text-base md:min-w-[185px]"
 		>
 			<figure className="rounded-t-md overflow-hidden">
 				<img
-					className="transition-all duration-300 rounded-t-md hover:scale-105 min-h-[277.5px] object-cover"
+					className="transition-all duration-300 rounded-t-md hover:scale-105 min-h-[200px] md:min-h-[277.5px] object-cover"
 					src={
 						imagePath
 							? "https://image.tmdb.org/t/p/original" + imagePath
@@ -41,7 +40,9 @@ export function MediaCard({
 				/>
 			</figure>
 
-			<div className={`bg-secondary p-3 rounded-b-md h-[92px] w-[185px]`}>
+			<div
+				className={`bg-secondary p-3 rounded-b-md h-[85px] md:h-[92px] md:w-[185px]`}
+			>
 				<h3 className="font-semibold line-clamp-2">{title}</h3>
 				{releaseDate && (
 					<p className="text-sm text-primary/60">

@@ -6,7 +6,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/axios";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { IoFilter } from "react-icons/io5";
 import { MediaCard } from "@/components/MediaCard";
 import { useInView } from "react-intersection-observer";
@@ -21,7 +21,7 @@ export default function SerachPage({ params }: Params) {
 	const [tmdbData, setTmdbData] = useState<any[]>([]);
 	const [mediaType, setMediaType] = useState("movie");
 
-	const { ref, inView } = useInView({ threshold: 1 });
+	const { ref, inView } = useInView({ threshold: 0.8 });
 
 	const fetchSearchResults = async () => {
 		if (page >= 500) return;
@@ -62,7 +62,7 @@ export default function SerachPage({ params }: Params) {
 		<main className="p-6">
 			<SearchBar query={params.query} className="m-auto" />
 
-			<div className="flex gap-x-6 mt-12">
+			<div className="flex flex-col gap-x-6 mt-12 md:flex-row">
 				<section>
 					<h1 className="bg-slate-500 px-4 py-2 rounded-t-md text-xl flex justify-between items-center">
 						Filter
@@ -70,7 +70,7 @@ export default function SerachPage({ params }: Params) {
 					</h1>
 					<RadioGroup
 						defaultValue="movies"
-						className="bg-secondary p-6 rounded-b-md text-lg w-[200px]"
+						className="bg-secondary mb-8 p-6 rounded-b-md text-lg md:w-[200px]"
 					>
 						<div className="flex items-center">
 							<RadioGroupItem
@@ -132,7 +132,7 @@ export default function SerachPage({ params }: Params) {
 								))}
 							</ul>
 						) : (
-							<ul className="grid grid-cols-5 gap-6 justify-items-center">
+							<ul className="grid grid-cols-2 gap-6 justify-items-center lg:grid-cols-4 md:grid-cols-3 xl:grid-cols-5">
 								{tmdbData.map((r: any) => (
 									<li>
 										<MediaCard

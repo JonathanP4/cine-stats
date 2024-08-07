@@ -29,7 +29,7 @@ export function SearchBar({ query, className }: Props) {
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 					placeholder="Search for a movie, tv series or person"
-					className="py-4 rounded-r-none focus-visible:ring-0 focus-visible:border-primary"
+					className="placeholder:text-xs md:placeholder:text-base py-4 rounded-r-none focus-visible:ring-0 focus-visible:border-primary"
 				/>
 				<Button type="submit" className="rounded-l-none">
 					<MagnifyingGlassIcon width={20} height={20} />
