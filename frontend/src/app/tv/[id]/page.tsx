@@ -273,8 +273,8 @@ export default function DetailsPage({ params }: Props) {
 					</section>
 				)}
 				{!!data?.videos?.results?.length && (
-					<section className="flex flex-col my-20 justify-evenly lg:flex-row">
-						<div className="flex flex-col justify-self-center md:space-x-8 md:flex-row">
+					<section className="flex flex-col my-20 items-center justify-evenly lg:flex-row md:items-start">
+						<div className="flex flex-col m-auto md:space-x-8 md:flex-row">
 							<div>
 								<h2 className="text-2xl font-bold mb-4">
 									Latest Video
