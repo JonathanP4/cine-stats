@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-	apiKey: "AIzaSyAg1VCv1yU0Bv00yI-dYyIUy7J52eeeeyI",
+	apiKey: process.env.FIREBASE_API_KEY,
 	authDomain: "cine-stats.firebaseapp.com",
 	databaseURL: "https://cine-stats-default-rtdb.firebaseio.com",
 	projectId: "cine-stats",
